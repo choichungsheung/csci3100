@@ -1,6 +1,6 @@
 import React from 'react';
 
-const MonthView = () => {
+const MonthView = ({ date, setDate }) => {
     return (
         <div>
             <h1>MonthView Component</h1>

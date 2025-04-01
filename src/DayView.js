@@ -1,9 +1,10 @@
 import React from 'react';
 
-const DayView = () => {
+const DayView = ({ date, setDate }) => {
+    
     return (
         <div>
-            <h1>DayView Component</h1>
+            <h1>DayView Component {date.toDateString()}</h1>
         </div>
     );
 };
