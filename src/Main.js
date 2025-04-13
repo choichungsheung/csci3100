@@ -13,7 +13,7 @@ const Main = () => {
                     
                         <Search />
                     </div>
-                    <div className="col p-0" style={{ height: '100%' }}>
+                    <div className="col-9 p-0" style={{ height: '100%' }}>
                         <ViewSelect />
                     </div>
                 </div>

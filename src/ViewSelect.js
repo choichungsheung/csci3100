@@ -48,6 +48,16 @@ const ViewSelect = () => {
                 <button onClick={() => setSelectedView('month')}>Month View</button>
                 <button onClick={() => setSelectedView('week')}>Week View</button>
             </div>
+                {/* week bar */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '5px', textAlign: 'right' }}>
+                    <div style={{ marginRight: '6px', fontSize: '1.1em' }}>SUN</div>
+                    <div style={{ marginRight: '6px', fontSize: '1.1em' }}>MON</div>
+                    <div style={{ marginRight: '6px', fontSize: '1.1em' }}>TUE</div>
+                    <div style={{ marginRight: '6px', fontSize: '1.1em' }}>WED</div>
+                    <div style={{ marginRight: '6px', fontSize: '1.1em' }}>THU</div>
+                    <div style={{ marginRight: '6px', fontSize: '1.1em' }}>FRI</div>
+                    <div style={{ marginRight: '6px', fontSize: '1.1em' }}>SAT</div>
+                </div>
             
             <div>
                 {renderView()}
