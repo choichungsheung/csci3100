@@ -42,7 +42,7 @@ const DayView = ({ date, setDate }) => {
                         month: 'long',
                         day: 'numeric',
                         year: 'numeric'
-                    })}
+                    })} 
                 </div>
 
                 {/* Time grid */}
@@ -53,13 +53,14 @@ const DayView = ({ date, setDate }) => {
                         </div>
                     ))}
 
-                    {/* Current time indicator */}
-                    <div 
-                        className="current-time-indicator"
-                        style={{ top: `${currentTimePosition}%` }}
-                    >
-                        <div className="current-time-dot" />
-                    </div>
+                    
+                </div>
+                {/* Current time indicator */}
+                <div 
+                    className="current-time-indicator"
+                    style={{ top: `${currentTimePosition}%` }}
+                >
+                    <div className="current-time-dot" />
                 </div>
             </div>
         </div>
