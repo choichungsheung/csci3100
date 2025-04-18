@@ -1,14 +1,21 @@
 import React, { useState } from 'react';
 import Search from './Search';
 import ViewSelect from './ViewSelect';
+import Logout from './Logout';
 
-const Main = () => {
+
+const Main = ({setLoggedIn}) => {
     const [showNewEventForm, setShowNewEventForm] = useState(false);
 
     return (
         <div className="App">
             {/* Sidebar */}
             <div className="sidebar">
+                {/* logout button */}
+                <div className="logout">
+                    <Logout setLoggedIn={setLoggedIn}/>
+                </div>
+
                 <div className="sidebar-header">
                     <button className="new-event-button" onClick={() => setShowNewEventForm(true)}>
                         <span>+</span>
@@ -24,6 +31,7 @@ const Main = () => {
                         <Search />
                     </div>
                 </div>
+
             </div>
 
             {/* Main Content */}
