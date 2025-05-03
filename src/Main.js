@@ -8,7 +8,7 @@ const Main = ({setLoggedIn}) => {
     const [showNewEventForm, setShowNewEventForm] = useState(false);
 
     return (
-        <div className="App">
+        <div className="App App-inner">
             {/* Sidebar */}
             <div className="sidebar">
                 {/* logout button */}
@@ -19,18 +19,20 @@ const Main = ({setLoggedIn}) => {
                 <div className="sidebar-header">
                     <button className="new-event-button" onClick={() => setShowNewEventForm(true)}>
                         <span>+</span>
-                        Create
+                        Create New Task
                     </button>
                 </div>
-                
+
                 <div className="sidebar-nav">
                     <div className="sidebar-nav-item active">
-                        <span>Calendar</span>
+                        <span>Show Calendar</span>
                     </div>
-                    <div className="sidebar-nav-item">
+
+                    <div className="sidebar-search">
                         <Search />
                     </div>
                 </div>
+                
 
             </div>
 
