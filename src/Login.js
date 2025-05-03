@@ -92,26 +92,26 @@ const Login = ({setLogin}) => {
     }
 
     return (
-        <div className="container my-4 d-flex align-items-center flex-column">
-            <h1>Welcome!</h1>
+        <div className="container login-container my-4 d-flex align-items-center flex-column">
+            <h1>Login</h1>
             <div className="col-lg-6 col-9">
                 <form noValidate="novalidate">
                     <div className="form-group d-flex flex-column gap-2 m-2 my-4 ">
                         <div>
-                            <label htmlFor="authUsername">Username</label>
-                            <input type="text" className={`form-control ${!usernameValidated ? "is-invalid" : null}`} id="authUsername" required onChange={() => { setUsernameValidated(true); setPasswordValidated(true); }} />
+                            <label htmlFor="authUsername"></label>
+                            <input type="text" placeholder="Username" className={`form-control ${!usernameValidated ? "is-invalid" : null}`} id="authUsername" required onChange={() => { setUsernameValidated(true); setPasswordValidated(true); }} />
                             <div className="invalid-feedback">{usernameFeedback}</div>
                         </div>
                         <div>
-                            <label htmlFor="authPassword">Password</label>
-                            <input type="password" className={`form-control ${!passwordValidated ? "is-invalid" : null}`} id="authPassword" onChange={() => { setUsernameValidated(true); setPasswordValidated(true); }}
+                            <label htmlFor="authPassword"></label>
+                            <input type="password" placeholder="Password" className={`form-control ${!passwordValidated ? "is-invalid" : null}`} id="authPassword" onChange={() => { setUsernameValidated(true); setPasswordValidated(true); }}
                                 required />
                             <div className="invalid-feedback">{passwordFeedback}</div>
                         </div>
                     </div>
-                    <div className="form-group m-2 my-4 d-flex gap-2">
-                        <button type="button" className="btn btn-primary w-50" onClick={handleLogin}>Login</button>
-                        <button type="button" className="btn btn-outline-primary w-50" onClick={() => navigate("/register")}>Register</button>
+                    <div className="form-group m-2 mt-5 mb-2 d-flex gap-2">
+                        <button type="button" className="btn login-btn  w-50" onClick={handleLogin}>Login</button>
+                        <button type="button" className="btn reg-btn w-50" onClick={() => navigate("/register")}>Register</button>
                     </div>
                 </form>
             </div>
