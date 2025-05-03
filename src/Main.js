@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Search from './Search';
 import ViewSelect from './ViewSelect';
 import Logout from './Logout';
+import AddTask from './AddTask';
 
 
 const Main = ({setLoggedIn}) => {
@@ -41,12 +42,48 @@ const Main = ({setLoggedIn}) => {
                 <ViewSelect />
             </div>
 
-            {/* New Event Form Modal - can be implemented later */}
+            {/* New Event Form */}
             {showNewEventForm && (
-                <div className="modal">
-                    {/* Add event form here */}
-                </div>
-            )}
+            <div style={{ 
+                width: '400px', 
+                height: '80vh', 
+                backgroundColor: 'white', 
+                margin: '0 auto', 
+                position: 'fixed', 
+                top: '50%', 
+                left: '50%', 
+                transform: 'translate(-50%, -50%)', 
+                borderRadius: '20px',
+                padding: '20px',
+                boxShadow: " 0 0px 7px rgba(0, 0, 0, 0.15)",
+                zIndex: 20 
+            }}>
+                <button 
+                    className="close" 
+                    onClick={() => setShowNewEventForm(false)} 
+                    style={{
+                        position: 'fixed',
+                        top: '10px',
+                        right: '10px',
+                        background: 'transparent',
+                        border: 'none',
+                        fontSize: '1.5rem',
+                        cursor: 'pointer',
+                        height: '30px',
+                        width: '30px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
+                >
+                    &times;
+                </button>
+                <AddTask onClose={() => setShowNewEventForm(false)} />
+            </div>)}
+
+            
+            
+            
         </div>
     );
 };
