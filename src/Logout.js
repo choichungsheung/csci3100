@@ -17,7 +17,7 @@ const Logout = ({setLoggedIn}) => {
     return (
         <div style={{userSelect:"none"}} className="d-flex align-items-center form-inline navbar-text justify-content-end">
             <span className="text-nowrap">Welcome, {username}!</span>
-            <button className="btn btn-link p-0 mx-2" onClick={() => logout()}>Logout</button>
+            <button className="btn logout-btn btn-link p-0 mx-2" onClick={() => logout()}>Logout</button>
         </div>
 
     )
