@@ -22,7 +22,7 @@ const MonthView = ({ date, setDate }) => {
         // Render empty blocks before the first day of the month
         for (let i = 0; i < firstDayOfWeek; i++) {
             calendarBlocks.push(
-                <div key={`empty-${i}`} className="CalendarBlock">
+                <div key={`empty-${i}`} className="CalendarBlock empty">
                     {/* Empty block */}
                     {/* currentDay is 0 if empty */}
                     <CalendarBlock date={date} setDate={setDate} currentDay={0} />
