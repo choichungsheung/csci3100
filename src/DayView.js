@@ -58,7 +58,7 @@ const DayView = ({ date, setDate }) => {
                 {/* Current time indicator */}
                 <div 
                     className="current-time-indicator"
-                    style={{ top: `${currentTimePosition}%` }}
+                    style={{ top: `${currentTimePosition+((60/1440)*100)}%` }}
                 >
                     <div className="current-time-dot" />
                 </div>
