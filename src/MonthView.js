@@ -44,7 +44,7 @@ const MonthView = ({ date, setDate }) => {
     };
 
     return (
-        <div>
+        <div className='monthview-outer'>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '5px' }}>
                 {renderCalendar()}
             </div>
