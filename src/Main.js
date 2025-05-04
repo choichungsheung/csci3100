@@ -56,7 +56,8 @@ const Main = ({setLoggedIn}) => {
                 borderRadius: '20px',
                 padding: '20px',
                 boxShadow: " 0 0px 7px rgba(0, 0, 0, 0.15)",
-                zIndex: 20 
+                zIndex: 20 ,
+                overflowY: 'auto',
             }}>
                 <button 
                     className="close" 
