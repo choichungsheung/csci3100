@@ -276,4 +276,84 @@ app.get('/api/searchTask', async (req, res) => {
     }
 });
 
+app.get('/api/getTask', async (req, res) => {
+    console.log("Fetching all tasks for user");
+
+    const { username } = req.query;
+
+    try {
+        // Validate required fields
+        if (!username) {
+            return res.status(400).json({ message: "Missing required fields.", content: null });
+        }
+
+        // Find the user by username and populate their events
+        const user = await User.findOne({ username }).populate('events');
+        if (!user) {
+            return res.status(404).json({ message: "User not found.", content: null });
+        }
+
+        // Return all tasks from the user's events array
+        res.status(200).json({ message: "Tasks fetched successfully.", content: user.events });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to fetch tasks.", content: { err } });
+    }
+});
+
+app.post('/api/editTask', async (req, res) => {
+    console.log("Editing a task");
+
+    const {
+        eventID, // Event ID to identify the task to be edited
+        taskName,
+        color,
+        icon,
+        startTime,
+        endTime,
+        description,
+        enableNotification,
+        notificationTime,
+        username, // Get the username from the request body
+    } = req.body;
+
+    try {
+        // Validate required fields
+        if (!eventID || !taskName || !color || !icon || !startTime || !endTime || !username) {
+            console.log(eventID, taskName, color, icon, startTime, endTime, username);
+            return res.status(400).json({ message: "Missing required fields.", content: null });
+        }
+
+        // Find the user by username
+        const user = await User.findOne({ username }).populate('events');
+        if (!user) {
+            return res.status(404).json({ message: "User not found.", content: null });
+        }
+
+        // Find the event to be edited
+        const eventToEdit = await Event.findOne({ eventID });
+        if (!eventToEdit) {
+            return res.status(404).json({ message: "Event not found.", content: null });
+        }
+
+        // Update the event with the new information
+        eventToEdit.eventName = taskName;
+        eventToEdit.color = color;
+        eventToEdit.icon = icon;
+        eventToEdit.startTime = new Date(startTime);
+        eventToEdit.endTime = new Date(endTime);
+        eventToEdit.description = description || ""; // Optional field
+        eventToEdit.enableNotification = enableNotification || false;
+        eventToEdit.notificationTime = enableNotification ? new Date(notificationTime) : null;
+
+        // Save the updated event to the database
+        const updatedEvent = await eventToEdit.save();
+
+        res.status(200).json({ message: "Task updated successfully.", content: updatedEvent });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to update task.", content: { err } });
+    }
+});
+
 const server = app.listen(3001);
