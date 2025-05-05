@@ -75,7 +75,7 @@ const eventSchema = mongoose.Schema({
         type: String,
     },
     color: {
-        type: Number,
+        type: String,
         required: true,
     },
     icon: {
@@ -187,6 +187,93 @@ app.post('/api/login', (req, res) => {
         console.log(err);
         res.status(404).json({ message: 'Failed to login.', content: { err } });
     });
+});
+
+app.post('/api/addTask', async (req, res) => {
+    console.log("Adding a new task");
+
+    const {
+        taskName,
+        color,
+        icon,
+        startTime,
+        endTime,
+        description,
+        enableNotification,
+        notificationTime,
+        username, // Get the username from the request body
+    } = req.body;
+
+    try {
+        // Validate required fields
+        if (!taskName || !color || !icon || !startTime || !endTime || !username) {
+            return res.status(400).json({ message: "Missing required fields.", content: null });
+        }
+
+        // Find the user by username
+        const user = await User.findOne({ username });
+        if (!user) {
+            return res.status(404).json({ message: "User not found.", content: null });
+        }
+
+        // Find the largest existing eventID in the database
+        const largestEvent = await Event.findOne().sort({ eventID: -1 }).exec();
+        const newEventID = largestEvent ? largestEvent.eventID + 1 : 1; // Start from 1 if no events exist
+
+        // Create a new event
+        const newEvent = new Event({
+            eventID: newEventID, // Use the incremented eventID
+            eventName: taskName,
+            startTime: new Date(startTime),
+            endTime: new Date(endTime),
+            description: description || "", // Optional field
+            color,
+            icon,
+            enableNotification: enableNotification || false,
+            notificationTime: enableNotification ? new Date(notificationTime) : null,
+        });
+
+        // Save the event to the database
+        const savedEvent = await newEvent.save();
+
+        // Add the event to the user's events array
+        user.events.push(savedEvent._id);
+        await user.save();
+
+        res.status(200).json({ message: "Task added successfully.", content: savedEvent });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to add task.", content: { err } });
+    }
+});
+
+app.get('/api/searchTask', async (req, res) => {
+    console.log("Searching tasks");
+
+    const { username, query } = req.query;
+
+    try {
+        // Validate required fields
+        if (!username || !query) {
+            return res.status(400).json({ message: "Missing required fields.", content: null });
+        }
+
+        // Find the user by username
+        const user = await User.findOne({ username }).populate('events');
+        if (!user) {
+            return res.status(404).json({ message: "User not found.", content: null });
+        }
+
+        // Filter events where the event name contains the query string (case-insensitive)
+        const searchResults = user.events.filter(event =>
+            event.eventName.toLowerCase().includes(query.toLowerCase())
+        );
+
+        res.status(200).json({ message: "Search successful.", content: searchResults });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to search tasks.", content: { err } });
+    }
 });
 
 const server = app.listen(3001);

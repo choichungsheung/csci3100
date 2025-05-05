@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Icon } from '@iconify/react';
+import Cookies from "js-cookie"; // Ensure this is imported
 
 // Predefined list of popular icons for suggestions
 const predefinedIcons = [
@@ -34,6 +35,21 @@ const predefinedIcons = [
 ];
 
 const predefinedColors = ['#DD0E0E', '#29E510', '#116FE8', '#ECE518', '#9B42D7']; // Default colors
+
+const getIconColor = (color) => {
+    // Convert hex color to RGB
+    const hex = color.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+
+    // Calculate grayscale value
+    const grayscale = 0.299 * r + 0.587 * g + 0.114 * b;
+
+    // Return black or white based on the grayscale value
+    return grayscale > 127 ? '#4D4D4D' : '#fff';
+};
+
 
 const AddTask = ({ onClose }) => {
     const currentHour = new Date().getHours(); // Get the current hour
@@ -139,22 +155,6 @@ const AddTask = ({ onClose }) => {
             // Add the custom color to the list if it doesn't already exist
             setCustomColors([customColor]);
         }
-    };
-
-    const handleHourChange = (value, setHour) => {
-        let hour = parseInt(value, 10);
-        if (isNaN(hour)) hour = 0; // Default to 0 if input is invalid
-        if (hour < 0) hour = 0; // Limit to minimum 0
-        if (hour > 23) hour = 23; // Limit to maximum 23
-        setHour(hour);
-    };
-
-    const handleMinuteChange = (value, setMinute) => {
-        let minute = parseInt(value, 10);
-        if (isNaN(minute)) minute = 0; // Default to 0 if input is invalid
-        if (minute < 0) minute = 0; // Limit to minimum 0
-        if (minute > 59) minute = 59; // Limit to maximum 59
-        setMinute(minute);
     };
 
     const handleStartTimeChange = async () => {
@@ -351,29 +351,40 @@ const AddTask = ({ onClose }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Ensure startTime and endTime are updated
-        await handleStartTimeChange();
-        await handleEndTimeChange();
-
-        // If the form is invalid, do not proceed
-        if (!e.target.checkValidity()) {
-            return;
-        }
+        const username = Cookies.get("username"); // Get the username from cookies
 
         const newTask = {
             taskName,
             color,
             icon,
-            startTime,
-            endTime,
+            startTime: startTime.toISOString(),
+            endTime: endTime.toISOString(),
             description,
             enableNotification,
-            notificationTime: enableNotification ? notificationTime : null,
+            notificationTime: enableNotification ? notificationTime.toISOString() : null,
+            username, // Include the username in the request body
         };
 
-        console.log('New Task:', newTask);
-        // Add logic to save the task (e.g., API call)
-        onClose();
+        try {
+            const response = await fetch("http://localhost:3001/api/addTask", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(newTask),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                console.log("Task added successfully:", data.content);
+                onClose(); // Close the form
+            } else {
+                console.error("Failed to add task:", data.message);
+            }
+        } catch (err) {
+            console.error("Error adding task:", err);
+        }
     };
 
     useEffect(() => {
@@ -455,7 +466,7 @@ const AddTask = ({ onClose }) => {
                     }}
                     onClick={handleSquareClick}
                 >
-                    {icon && <Icon icon={icon} style={{ fontSize: '38px', color: '#fff' }} />}
+                    {icon && <Icon icon={icon} style={{ fontSize: '38px', color: getIconColor(color) }} />}
                 </div>
             </div>
             {/*icon select*/}
@@ -475,7 +486,7 @@ const AddTask = ({ onClose }) => {
                             border: '1px solid #ccc',
                         }}
                     />
-                    {/*show icon result div*/}
+                    {/*show search icon result div*/}
                     <div
                         style={{
                             display: 'flex',
@@ -948,11 +959,17 @@ const AddTask = ({ onClose }) => {
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    borderTop: '1px solid black',
                     marginTop: '30px',
                 }}
             >
-                <button type="submit" className='btn'><h4>Add Task</h4></button>
+                <button type="submit" className='btn' style={{
+                    background: 'linear-gradient(135deg, rgb(89, 78, 163) 0%, rgb(134, 62, 207) 100%)',
+                    color: '#fff',
+                    padding: '10px 40px',
+                    border: 'none',
+                    borderRadius: '7px',
+                    cursor: 'pointer',
+                }}><h4>Add Task</h4></button>
             </div>
         </form>
         
