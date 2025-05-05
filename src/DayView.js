@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-const DayView = ({ date, setDate }) => {
+const DayView = ({ date, setDate ,tasks, setTasks}) => {
     const [currentTimePosition, setCurrentTimePosition] = useState(0);
 
     // Generate time labels (24-hour format)

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Icon } from '@iconify/react';
 import Cookies from "js-cookie"; // Ensure this is imported
+import fetchTasks from './utils/fetchTasks';
 
 // Predefined list of popular icons for suggestions
 const predefinedIcons = [
@@ -390,8 +391,8 @@ const AddTask = ({ onClose, tasks, setTasks}) => {
             if (response.ok) {
                 console.log("Task added successfully:", data.content);
 
-                // Update the tasks state in the frontend
-                setTasks((prevTasks) => [...prevTasks, data.content]);
+                // Fetch all tasks from the database and update the frontend state
+                await fetchTasks(setTasks);
 
                 onClose(); // Close the form
             } else {

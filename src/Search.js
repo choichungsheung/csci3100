@@ -20,6 +20,8 @@ const Search = ({ tasks, setEditEventID }) => {
     const [searchResults, setSearchResults] = useState([]);
     const [activeBubble, setActiveBubble] = useState(null); // Track which task's bubble is active
 
+    tasks = tasks.filter((task) => !task.forDisplay);
+
     // Automatically update search results when tasks or query changes
     useEffect(() => {
         if (query.trim()) {
@@ -46,6 +48,7 @@ const Search = ({ tasks, setEditEventID }) => {
     };
 
     const renderTask = (result) => {
+
         const startDate = new Date(result.startTime);
         const endDate = new Date(result.endTime);
 

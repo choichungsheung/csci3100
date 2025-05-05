@@ -2,7 +2,7 @@ import React from 'react';
 import CalendarBlock from './CalendarBlock';
 
 
-const MonthView = ({ date, setDate }) => {
+const MonthView = ({ date, setDate ,tasks, setTasks, setSelectedView}) => {
     /**
      * Calendar Rendering Logic:
      * 1. Calculate the first day of the current month and determine its day of the week (0 = Sunday, 6 = Saturday).
@@ -34,7 +34,7 @@ const MonthView = ({ date, setDate }) => {
         for (let i = 0; i < daysInMonth; i++) {
             calendarBlocks.push(
                 <div key={`day-${currentDay}`} className="CalendarBlock">
-                    <CalendarBlock date={date} setDate={setDate} currentDay={currentDay} />
+                    <CalendarBlock date={date} setDate={setDate} currentDay={currentDay} tasks={tasks} setTasks={setTasks} setSelectedView={setSelectedView}/>
                 </div>
             );
             currentDay++;

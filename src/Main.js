@@ -5,6 +5,7 @@ import Logout from './Logout';
 import AddTask from './AddTask';
 import EditTask from './EditTask';
 import Cookies from 'js-cookie';
+import fetchTasks from './utils/fetchTasks'; // Import the utility function
 
 const Main = ({ setLoggedIn }) => {
     const [showNewEventForm, setShowNewEventForm] = useState(false);
@@ -13,23 +14,7 @@ const Main = ({ setLoggedIn }) => {
 
     // Fetch tasks when the page loads
     useEffect(() => {
-        const fetchTasks = async () => {
-            const username = Cookies.get('username'); // Get the username from cookies
-            try {
-                const response = await fetch(`http://localhost:3001/api/getTask?username=${username}`);
-                const data = await response.json();
-
-                if (response.ok) {
-                    setTasks(data.content); // Store tasks in state
-                } else {
-                    console.error('Failed to fetch tasks:', data.message);
-                }
-            } catch (err) {
-                console.error('Error fetching tasks:', err);
-            }
-        };
-
-        fetchTasks();
+        fetchTasks(setTasks); // Use the utility function
     }, []); // Run only once when the component mounts
 
     return (
@@ -62,7 +47,7 @@ const Main = ({ setLoggedIn }) => {
 
             {/* Main Content */}
             <div className="main-content">
-                <ViewSelect />
+                <ViewSelect tasks={tasks} setTasks={setTasks}/>
             </div>
 
             {/* New Event Form */}

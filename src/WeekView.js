@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-const WeekView = ({ date, setDate }) => {
+const WeekView = ({ date, setDate ,tasks, setTasks}) => {
     const [currentTimePosition, setCurrentTimePosition] = useState(0);
 
     // Generate time labels (24-hour format)
