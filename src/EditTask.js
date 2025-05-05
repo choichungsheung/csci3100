@@ -56,7 +56,7 @@ const getLocalDate = (date) => {
     return adjustedDate.toISOString().split('T')[0]; // Return the date in YYYY-MM-DD format
 };
 
-const AddTask = ({ onClose, tasks, setTasks}) => {
+const EditTask = ({ onClose,editEventID, tasks, setTasks}) => {
     const currentHour = new Date().getHours(); // Get the current hour
     const [startHour, setStartHour] = useState(currentHour); // Default hour to current hour
     const [startMinute, setStartMinute] = useState(0); // Default minute to 00
@@ -206,6 +206,7 @@ const AddTask = ({ onClose, tasks, setTasks}) => {
             setEndDate(newEndDate.toISOString().split('T')[0]);
         }
 
+        setStartDate(newStartDate);
         handleStartTimeChange(); // Update startTime whenever the date changes
         handleEndTimeChange(); // Update endTime to reflect the changes
     };
@@ -273,6 +274,7 @@ const AddTask = ({ onClose, tasks, setTasks}) => {
             setStartDate(newEndDate);
         }
 
+        setEndDate(newEndDate);
         handleEndTimeChange(); // Update endTime whenever the date changes
     };
 
@@ -358,13 +360,13 @@ const AddTask = ({ onClose, tasks, setTasks}) => {
             setIsNotificationTimeInitialized(true); // Mark as initialized
         }
     };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         const username = Cookies.get("username"); // Get the username from cookies
 
-        const newTask = {
+        const updatedTask = {
+            eventID: editEventID, // Include the editEventID as task ID
             taskName,
             color,
             icon,
@@ -377,30 +379,35 @@ const AddTask = ({ onClose, tasks, setTasks}) => {
         };
 
         try {
-            const response = await fetch("http://localhost:3001/api/addTask", {
+            const response = await fetch("http://localhost:3001/api/editTask", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(newTask),
+                body: JSON.stringify(updatedTask),
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                console.log("Task added successfully:", data.content);
+                console.log("Task updated successfully:", data.content);
 
                 // Update the tasks state in the frontend
-                setTasks((prevTasks) => [...prevTasks, data.content]);
+                setTasks((prevTasks) =>
+                    prevTasks.map((task) =>
+                        task.eventID === editEventID ? data.content : task
+                    )
+                );
 
                 onClose(); // Close the form
             } else {
-                console.error("Failed to add task:", data.message);
+                console.error("Failed to update task:", data.message);
             }
         } catch (err) {
-            console.error("Error adding task:", err);
+            console.error("Error updating task:", err);
         }
     };
+    
 
     useEffect(() => {
         handleStartTimeChange();
@@ -444,12 +451,38 @@ const AddTask = ({ onClose, tasks, setTasks}) => {
         console.log('Notification Time:', notificationTime);
     }, [notificationTime]);
 
+    // Initialize form fields with the task data
+    useEffect(() => {
+        const taskToEdit = tasks.find(task => task.eventID === editEventID);
+        if (taskToEdit) {
+            setTaskName(taskToEdit.eventName);
+            setColor(taskToEdit.color);
+            setIcon(taskToEdit.icon);
+            setStartDate(getLocalDate(new Date(taskToEdit.startTime))); // Adjust for timezone
+            setStartHour(new Date(taskToEdit.startTime).getHours());
+            setStartMinute(new Date(taskToEdit.startTime).getMinutes());
+            setEndDate(getLocalDate(new Date(taskToEdit.endTime))); // Adjust for timezone
+            setEndHour(new Date(taskToEdit.endTime).getHours());
+            setEndMinute(new Date(taskToEdit.endTime).getMinutes());
+            setDescription(taskToEdit.description || '');
+            setEnableNotification(taskToEdit.enableNotification || false);
+            if (taskToEdit.notificationTime) {
+                const notificationTime = new Date(taskToEdit.notificationTime);
+                setNotificationDate(getLocalDate(notificationTime)); // Adjust for timezone
+                setNotificationHour(notificationTime.getHours());
+                setNotificationMinute(notificationTime.getMinutes());
+            }
+        }
+    }, [editEventID, tasks]);
+
+    
+
     return (
         <>
         <form onSubmit={handleSubmit}>
             {/* Form title */}
             <h2 style={{ borderBottom: '1px solid black', padding: '5px 0' , marginBottom: '20px'}}>
-                New Task
+                Edit Task
             </h2>
             {/* Task name input + icon */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -984,7 +1017,7 @@ const AddTask = ({ onClose, tasks, setTasks}) => {
                     border: 'none',
                     borderRadius: '7px',
                     cursor: 'pointer',
-                }}><h4>Add Task</h4></button>
+                }}><h4>Edit Task</h4></button>
             </div>
         </form>
         
@@ -992,4 +1025,4 @@ const AddTask = ({ onClose, tasks, setTasks}) => {
     );
 };
 
-export default AddTask;
+export default EditTask;
