@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DayView from './DayView';
 import MonthView from './MonthView';
 import WeekView from './WeekView';
@@ -7,16 +7,77 @@ const ViewSelect = () => {
     const [selectedView, setSelectedView] = useState('day'); // Default to 'day'
     const [date, setDate] = useState(new Date()); // Default to today's date
 
-    const subtractOneMonth = () => {
+    // This effect will run whenever selectedView changes
+    useEffect(() => {
+        console.log(`View changed to: ${selectedView}`);
+    }, [selectedView]);
+
+    const handlePrevious = () => {
         const currentDate = new Date(date);
-        currentDate.setMonth(currentDate.getMonth() - 1);
+        
+        switch (selectedView) {
+            case 'day':
+                currentDate.setDate(currentDate.getDate() - 1);
+                break;
+            case 'week':
+                currentDate.setDate(currentDate.getDate() - 7);
+                break;
+            case 'month':
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                break;
+            default:
+                break;
+        }
+        
         setDate(currentDate);
     };
 
-    const addOneMonth = () => {
+    const handleNext = () => {
         const currentDate = new Date(date);
-        currentDate.setMonth(currentDate.getMonth() + 1);
+        
+        switch (selectedView) {
+            case 'day':
+                currentDate.setDate(currentDate.getDate() + 1);
+                break;
+            case 'week':
+                currentDate.setDate(currentDate.getDate() + 7);
+                break;
+            case 'month':
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                break;
+            default:
+                break;
+        }
+        
         setDate(currentDate);
+    };
+
+    const getHeaderText = () => {
+        const options = { 
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long', 
+            year: 'numeric'
+        };
+        
+        switch (selectedView) {
+            case 'day':
+                return date.toLocaleDateString('en-US', options);
+            case 'week': {
+                const weekStart = new Date(date);
+                const dayOfWeek = date.getDay(); // 0 for Sunday, 6 for Saturday
+                weekStart.setDate(date.getDate() - dayOfWeek);
+                
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekStart.getDate() + 6);
+                
+                return `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+            }
+            case 'month':
+                return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            default:
+                return '';
+        }
     };
 
     const renderView = () => {
@@ -24,7 +85,7 @@ const ViewSelect = () => {
             case 'day':
                 return <DayView date={date} setDate={setDate} />;
             case 'month':
-                return <MonthView date={date} setDate={setDate}/>;
+                return <MonthView date={date} setDate={setDate} setSelectedView={setSelectedView}/>;
             case 'week':
                 return <WeekView date={date} setDate={setDate}/>;
             default:
@@ -32,18 +93,32 @@ const ViewSelect = () => {
         }
     };
 
+    const renderWeekdayHeader = () => {
+        if (selectedView === 'month') {
+            return (
+                <div className="weekday-header">
+                    <div>Sun</div>
+                    <div>Mon</div>
+                    <div>Tue</div>
+                    <div>Wed</div>
+                    <div>Thu</div>
+                    <div>Fri</div>
+                    <div>Sat</div>
+                </div>
+            );
+        }
+        return null;
+    };
+
     return (
         <div className="calendar-container">
             <div className="calendar-header">
                 <div className="date-navigation">
-                    <button className="icon-button" onClick={subtractOneMonth}>
+                    <button className="icon-button" onClick={handlePrevious}>
                         <span>←</span>
                     </button>
-                    <h2>{date.toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'long'
-                    })}</h2>
-                    <button className="icon-button" onClick={addOneMonth}>
+                    <h2>{getHeaderText()}</h2>
+                    <button className="icon-button" onClick={handleNext}>
                         <span>→</span>
                     </button>
                 </div>
@@ -70,17 +145,7 @@ const ViewSelect = () => {
                 </div>
             </div>
 
-            {selectedView === 'month' && (
-                <div className="weekday-header">
-                    <div>Sun</div>
-                    <div>Mon</div>
-                    <div>Tue</div>
-                    <div>Wed</div>
-                    <div>Thu</div>
-                    <div>Fri</div>
-                    <div>Sat</div>
-                </div>
-            )}
+            {renderWeekdayHeader()}
             
             <div className="calendar-view">
                 {renderView()}
