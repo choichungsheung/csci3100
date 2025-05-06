@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import TaskBlock from './TaskBlock';
+import EditDeleteOption from './EditDeleteOption';
 
 
-const DayView = ({ date, setDate ,tasks, setTasks}) => {
+
+const DayView = ({ date, setDate ,tasks, setTasks, setEditEventID}) => {
     const [currentTimePosition, setCurrentTimePosition] = useState(0);
+    const [selectedLayer, setSelectedLayer] = useState(0); // Track the selected layer
+    const [activeBubble, setActiveBubble] = useState(null); // Track the active bubble (task eventID)
 
     // Generate time labels (24-hour format)
     const timeLabels = Array.from({ length: 24 }, (_, i) => 
@@ -78,6 +82,49 @@ const DayView = ({ date, setDate ,tasks, setTasks}) => {
         }
     });
 
+    
+
+
+    // Handle layer selection
+    const handleLayerClick = (layerIndex) => {
+        if (selectedLayer !== layerIndex) {
+            // Select the clicked layer
+            setSelectedLayer(layerIndex);
+            setActiveBubble(null); // Close any active bubble
+        }
+    };
+
+    // Handle task block click
+    const handleTaskBlockClick = (eventID, layerIndex) => {
+        if (selectedLayer === layerIndex) {
+            // If the layer is already selected, toggle the bubble for the clicked task
+            setActiveBubble((prevBubble) => (prevBubble === eventID ? null : eventID));
+        } else {
+            // Select the layer but do not show the bubble
+            handleLayerClick(layerIndex);
+        }
+    };
+
+    // Close the bubble and deselect the layer when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            // Ignore clicks on the view selection buttons
+            if (event.target.closest('.view-select')) {
+                return;
+            }
+
+            // Deselect the layer and close any active bubble
+            setSelectedLayer(null);
+            setActiveBubble(null);
+        };
+
+        document.addEventListener('click', handleClickOutside);
+        return () => {
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, []);
+
+
     // Calculate TaskBlock positions
     const initialMargin = 30; // Initial margin for the first layer
     const offsetMargin = 35; // Offset margin for each subsequent layer
@@ -92,13 +139,34 @@ const DayView = ({ date, setDate ,tasks, setTasks}) => {
         const taskToPass = task.forDisplay
             ? tasks.find((t) => t.eventID === task.eventID && t.crossADay)
             : task;
-        return (
-            <TaskBlock
-                key={task.eventID}
-                top={top}
-                height={height}
-                task={taskToPass}
+
+        // Pass EditDeleteOption as a prop if the bubble should be active
+        const editDeleteBubble =
+        activeBubble === task.eventID && selectedLayer === layerIndex ? (
+            <EditDeleteOption
+                setEditEventID={setEditEventID}
+                eventID={task.eventID}
+                setTasks={setTasks}
             />
+        ) : null;
+
+        return (
+            <div key={task.eventID}
+            onClick={(e) => {
+                e.stopPropagation(); // Prevent click from propagating to the document
+                handleTaskBlockClick(task.eventID, layerIndex);
+            }}
+            >
+                <TaskBlock
+                    key={task.eventID}
+                    top={top}
+                    height={height}
+                    task={taskToPass}
+                    showDetails={selectedLayer === layerIndex}
+                    editDeleteBubble={editDeleteBubble} // Pass the bubble as a prop
+                    
+                />
+            </div>
         );
     };
 
@@ -147,6 +215,10 @@ const DayView = ({ date, setDate ,tasks, setTasks}) => {
                             key={layerIndex}
                             style={{
                                 marginLeft: `${initialMargin + offsetMargin * layerIndex}px`,
+                            }}
+                            onClick={(e) => {
+                                e.stopPropagation(); // Prevent click from propagating to the document
+                                handleLayerClick(layerIndex);
                             }}
                         >
                             {layer.map((task) => renderTaskBlock(task, layerIndex))}

@@ -347,7 +347,7 @@
 .time-grid-header {
   position: sticky;
   top: 0;
-  z-index: 2;
+  z-index: 4;
   background-color: white;
   border-bottom: 1px solid var(--border-color);
   height: 60px;
@@ -405,7 +405,7 @@
   left: 0;
   right: 0;
   border-top: 2px solid #ea4335;
-  z-index: 5;
+  z-index: 2;
 }
 
 .current-time-dot {

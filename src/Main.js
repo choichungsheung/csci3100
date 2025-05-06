@@ -47,7 +47,7 @@ const Main = ({ setLoggedIn }) => {
 
             {/* Main Content */}
             <div className="main-content">
-                <ViewSelect tasks={tasks} setTasks={setTasks}/>
+                <ViewSelect tasks={tasks} setTasks={setTasks} setEditEventID={setEditEventID}/>
             </div>
 
             {/* New Event Form */}

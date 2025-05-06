@@ -3,7 +3,7 @@ import DayView from './DayView';
 import MonthView from './MonthView';
 import WeekView from './WeekView';
 
-const ViewSelect = ({tasks, setTasks}) => {
+const ViewSelect = ({tasks, setTasks, setEditEventID}) => {
     const [selectedView, setSelectedView] = useState('day'); // Default to 'day'
     const [date, setDate] = useState(new Date()); // Default to today's date
 
@@ -22,7 +22,7 @@ const ViewSelect = ({tasks, setTasks}) => {
     const renderView = () => {
         switch (selectedView) {
             case 'day':
-                return <DayView date={date} setDate={setDate} tasks={tasks} setTasks={setTasks}/>;
+                return <DayView date={date} setDate={setDate} tasks={tasks} setTasks={setTasks} setEditEventID={setEditEventID}/>;
             case 'month':
                 return <MonthView date={date} setDate={setDate} tasks={tasks} setTasks={setTasks} setSelectedView={setSelectedView}/>;
             case 'week':
