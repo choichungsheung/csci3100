@@ -8,11 +8,6 @@ const DayView = ({ date, setDate }) => {
         `${i.toString().padStart(2, '0')}:00`
     );
 
-    const today = new Date();
-    const isSameDay = date.getFullYear() === today.getFullYear() &&
-                      date.getMonth() === today.getMonth() &&
-                      date.getDate() === today.getDate();
-
     // Update current time indicator
     useEffect(() => {
         const updateCurrentTime = () => {
@@ -26,23 +21,6 @@ const DayView = ({ date, setDate }) => {
 
         return () => clearInterval(interval);
     }, []);
-
-    const renderTimeIndicator = () => {
-        // Compare dates by converting to strings or comparing year/month/day values
-
-                          
-        if (isSameDay) {
-            return (
-                <div 
-                    className="current-time-indicator"
-                    style={{ top: `${currentTimePosition+((60/1440)*100)}%` }}
-                >
-                    <div className="current-time-dot" />
-                </div>
-            );
-        }
-        return null;
-    };
 
     return (
         <div className="time-grid-container">
@@ -58,7 +36,7 @@ const DayView = ({ date, setDate }) => {
             {/* Day grid */}
             <div className="time-grid">
                 {/* Header */}
-                <div className={`time-grid-header ${isSameDay ? 'td' : ''} `}>
+                <div className="time-grid-header">
                     {date.toLocaleDateString('en-US', { 
                         weekday: 'long',
                         month: 'long',
@@ -78,7 +56,12 @@ const DayView = ({ date, setDate }) => {
                     
                 </div>
                 {/* Current time indicator */}
-                {renderTimeIndicator()}
+                <div 
+                    className="current-time-indicator"
+                    style={{ top: `${currentTimePosition+((60/1440)*100)}%` }}
+                >
+                    <div className="current-time-dot" />
+                </div>
             </div>
         </div>
     );
