@@ -1,5 +1,6 @@
 import React from 'react';
 import { Icon } from '@iconify/react'; // Import Iconify for rendering icons
+import { getIconColor } from './utils/colorUtils'; // Import the utility function
 
 const CalendarBlock = ({ date, setDate, currentDay, tasks, setTasks, setSelectedView }) => {
     if (currentDay === 0) {
@@ -7,7 +8,7 @@ const CalendarBlock = ({ date, setDate, currentDay, tasks, setTasks, setSelected
     }
 
     tasks = tasks.filter((task) => !task.crossADay);
-    
+
     const handleClick = () => {
         // Create a new date object with the same year and month, but replace the day with currentDay
         const newDate = new Date(date);
@@ -27,19 +28,7 @@ const CalendarBlock = ({ date, setDate, currentDay, tasks, setTasks, setSelected
         );
     };
 
-    const getIconColor = (color) => {
-        // Convert hex color to RGB
-        const hex = color.replace('#', '');
-        const r = parseInt(hex.substring(0, 2), 16);
-        const g = parseInt(hex.substring(2, 4), 16);
-        const b = parseInt(hex.substring(4, 6), 16);
-
-        // Calculate grayscale value
-        const grayscale = 0.299 * r + 0.587 * g + 0.114 * b;
-
-        // Return black or white based on the grayscale value
-        return grayscale > 127 ? '#4D4D4D' : '#fff';
-    };
+    
 
     // Filter tasks that start on the date represented by the CalendarBlock
     const blockDate = new Date(date);

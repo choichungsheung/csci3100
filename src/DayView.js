@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import TaskBlock from './TaskBlock';
+
 
 const DayView = ({ date, setDate ,tasks, setTasks}) => {
     const [currentTimePosition, setCurrentTimePosition] = useState(0);
@@ -21,6 +23,84 @@ const DayView = ({ date, setDate ,tasks, setTasks}) => {
 
         return () => clearInterval(interval);
     }, []);
+
+    // Filter tasks for today and exclude crossADay tasks
+    const tasks_temp = tasks
+        .filter((task) => {
+            const taskStartDate = new Date(task.startTime);
+            return (
+                taskStartDate.toDateString() === date.toDateString() &&
+                !task.crossADay
+            );
+        })
+        .sort((a, b) => {
+            const startA = new Date(a.startTime).getTime();
+            const startB = new Date(b.startTime).getTime();
+
+            // First, sort by start time
+            if (startA !== startB) {
+                return startA - startB;
+            }
+
+            // If start times are the same, sort by duration (longer duration first)
+            const durationA = new Date(a.endTime).getTime() - startA;
+            const durationB = new Date(b.endTime).getTime() - startB;
+            return durationB - durationA;
+        }); // Sort by start time
+
+    // Organize tasks into layers
+    const layers = [[]]; // Start with one layer
+
+    tasks_temp.forEach((task) => {
+        const taskStart = new Date(task.startTime).getTime();
+        const taskEnd = new Date(task.endTime).getTime();
+        let placed = false;
+
+        // Try to place the task in an existing layer
+        for (let i = 0; i < layers.length; i++) {
+            const layer = layers[i];
+            const conflict = layer.some((layerTask) => {
+                const layerTaskStart = new Date(layerTask.startTime).getTime();
+                const layerTaskEnd = new Date(layerTask.endTime).getTime();
+                return taskStart < layerTaskEnd && taskEnd > layerTaskStart; // Check for overlap
+            });
+
+            if (!conflict) {
+                layer.push(task);
+                placed = true;
+                break;
+            }
+        }
+
+        // If the task couldn't be placed in any existing layer, create a new layer
+        if (!placed) {
+            layers.push([task]);
+        }
+    });
+
+    // Calculate TaskBlock positions
+    const initialMargin = 30; // Initial margin for the first layer
+    const offsetMargin = 35; // Offset margin for each subsequent layer
+
+    const renderTaskBlock = (task, layerIndex) => {
+        const taskStart = new Date(task.startTime);
+        const taskEnd = new Date(task.endTime);
+        const top = ((taskStart.getHours() * 60 + taskStart.getMinutes()) / 1440) * 100; // Top position as a percentage of the day
+        const height = ((taskEnd - taskStart) / (1000 * 60 * 1440)) * 100; // Height as a percentage of the day
+
+        // If the task is a display-only copy, find the original task
+        const taskToPass = task.forDisplay
+            ? tasks.find((t) => t.eventID === task.eventID && t.crossADay)
+            : task;
+        return (
+            <TaskBlock
+                key={task.eventID}
+                top={top}
+                height={height}
+                task={taskToPass}
+            />
+        );
+    };
 
     return (
         <div className="time-grid-container">
@@ -53,14 +133,25 @@ const DayView = ({ date, setDate ,tasks, setTasks}) => {
                         </div>
                     ))}
 
-                    
-                </div>
-                {/* Current time indicator */}
-                <div 
-                    className="current-time-indicator"
-                    style={{ top: `${currentTimePosition+((60/1440)*100)}%` }}
-                >
-                    <div className="current-time-dot" />
+                    {/* Current time indicator */}
+                    <div 
+                        className="current-time-indicator"
+                        style={{ top: `${currentTimePosition}%` }} 
+                    >
+                        <div className="current-time-dot" />
+                    </div>
+
+                    {/* Render Task Blocks */}
+                    {layers.map((layer, layerIndex) => (
+                        <div
+                            key={layerIndex}
+                            style={{
+                                marginLeft: `${initialMargin + offsetMargin * layerIndex}px`,
+                            }}
+                        >
+                            {layer.map((task) => renderTaskBlock(task, layerIndex))}
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>

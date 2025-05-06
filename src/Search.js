@@ -1,31 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Icon } from '@iconify/react';
+import EditDeleteOption from './EditDeleteOption';
+import { getIconColor } from './utils/colorUtils';
 
-const getIconColor = (color) => {
-    // Convert hex color to RGB
-    const hex = color.replace('#', '');
-    const r = parseInt(hex.substring(0, 2), 16);
-    const g = parseInt(hex.substring(2, 4), 16);
-    const b = parseInt(hex.substring(4, 6), 16);
 
-    // Calculate grayscale value
-    const grayscale = 0.299 * r + 0.587 * g + 0.114 * b;
 
-    // Return black or white based on the grayscale value
-    return grayscale > 127 ? '#4D4D4D' : '#fff';
-};
-
-const Search = ({ tasks, setEditEventID }) => {
+const Search = ({ tasks ,setTasks, setEditEventID }) => {
     const [query, setQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [activeBubble, setActiveBubble] = useState(null); // Track which task's bubble is active
 
-    tasks = tasks.filter((task) => !task.forDisplay);
+    var filtered_tasks = tasks.filter((task) => !task.forDisplay);
 
     // Automatically update search results when tasks or query changes
     useEffect(() => {
         if (query.trim()) {
-            const results = tasks.filter((task) =>
+            const results = filtered_tasks.filter((task) =>
                 task.eventName.toLowerCase().includes(query.toLowerCase())
             );
             setSearchResults(results);
@@ -42,10 +32,6 @@ const Search = ({ tasks, setEditEventID }) => {
         setActiveBubble(null); // Close the active bubble
     };
 
-    const handleEditClick = (taskID) => {
-        setEditEventID(taskID); // Set the edit event ID
-        handleBubbleClose(); // Close the bubble
-    };
 
     const renderTask = (result) => {
 
@@ -134,37 +120,17 @@ const Search = ({ tasks, setEditEventID }) => {
 
                 {/* Bubble for Edit Button */}
                 {activeBubble === result.eventID && (
-                    <div
-                        style={{
-                            position: 'absolute',
-                            top: '0%',
-                            right: '0%',
-                            marginTop: '5px',
-                            padding: '10px',
-                            backgroundColor: 'white',
-                            border: '1px solid #ccc',
-                            borderRadius: '5px',
-                            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.2)',
-                            zIndex: 10,
-                        }}
-                        onClick={(e) => e.stopPropagation()} // Prevent click from propagating to the document
-                    >
-                        <button
-                            style={{
-                                padding: '0px 0px',
-                                border: 'none',
-                                borderRadius: '5px',
-                                background: 'none',
-                                color: '#5E5E5E',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                            }}
-                            onClick={() => handleEditClick(result.eventID)}
-                        >
-                            Edit <Icon icon="mingcute:pen-fill" style={{ fontSize: '15px', marginLeft: '5px' }} />
-                        </button>
-                    </div>
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        marginTop: '5px',
+                        zIndex: 10,
+                    }}
+                >
+                    <EditDeleteOption setEditEventID={setEditEventID} eventID={result.eventID} setTasks={setTasks}/>
+                </div>
                 )}
             </div>
         );

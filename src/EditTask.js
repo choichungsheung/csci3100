@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Icon } from '@iconify/react';
 import Cookies from "js-cookie"; // Ensure this is imported
 import fetchTasks from './utils/fetchTasks';
+import { getIconColor } from './utils/colorUtils';
 
 // Predefined list of popular icons for suggestions
 const predefinedIcons = [
@@ -37,19 +38,7 @@ const predefinedIcons = [
 
 const predefinedColors = ['#DD0E0E', '#29E510', '#116FE8', '#ECE518', '#9B42D7']; // Default colors
 
-const getIconColor = (color) => {
-    // Convert hex color to RGB
-    const hex = color.replace('#', '');
-    const r = parseInt(hex.substring(0, 2), 16);
-    const g = parseInt(hex.substring(2, 4), 16);
-    const b = parseInt(hex.substring(4, 6), 16);
 
-    // Calculate grayscale value
-    const grayscale = 0.299 * r + 0.587 * g + 0.114 * b;
-
-    // Return black or white based on the grayscale value
-    return grayscale > 127 ? '#4D4D4D' : '#fff';
-};
 
 const getLocalDate = (date) => {
     const timezoneOffset = date.getTimezoneOffset(); // Get the timezone offset in minutes

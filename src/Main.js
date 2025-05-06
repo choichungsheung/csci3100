@@ -40,7 +40,7 @@ const Main = ({ setLoggedIn }) => {
 
                     <div className="sidebar-search">
                         {/* Pass tasks to Search */}
-                        <Search tasks={tasks} setEditEventID={setEditEventID}/>
+                        <Search tasks={tasks} setTasks={setTasks} setEditEventID={setEditEventID}/>
                     </div>
                 </div>
             </div>

@@ -356,4 +356,38 @@ app.post('/api/editTask', async (req, res) => {
     }
 });
 
+app.post('/api/deleteTask', async (req, res) => {
+    console.log("Deleting a task");
+
+    const { eventID } = req.body; // Extract eventID from the request body
+
+    try {
+        // Validate required fields
+        if (!eventID) {
+            return res.status(400).json({ message: "Missing required field: eventID.", content: null });
+        }
+
+        // Find the event by eventID
+        const eventToDelete = await Event.findOne({ eventID });
+        if (!eventToDelete) {
+            return res.status(404).json({ message: "Event not found.", content: null });
+        }
+
+        // Delete the event
+        await Event.deleteOne({ eventID });
+
+        // Optionally, remove the event reference from the user's events array
+        const user = await User.findOne({ events: eventToDelete._id });
+        if (user) {
+            user.events = user.events.filter(event => event.toString() !== eventToDelete._id.toString());
+            await user.save();
+        }
+
+        res.status(200).json({ message: "Task deleted successfully.", content: null });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to delete task.", content: { err } });
+    }
+});
+
 const server = app.listen(3001);

@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import TaskBlock from './TaskBlock';
+
 
 const WeekView = ({ date, setDate ,tasks, setTasks}) => {
     const [currentTimePosition, setCurrentTimePosition] = useState(0);
@@ -78,6 +80,8 @@ const WeekView = ({ date, setDate ,tasks, setTasks}) => {
                     >
                         <div className="current-time-dot" />
                     </div>
+
+                    <TaskBlock top={0} height={100}/>
                 </div>
             </div>
         </div>
