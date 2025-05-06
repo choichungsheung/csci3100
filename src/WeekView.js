@@ -81,7 +81,7 @@ const WeekView = ({ date, setDate ,tasks, setTasks}) => {
                         <div className="current-time-dot" />
                     </div>
 
-                    <TaskBlock top={0} height={100}/>
+                    
                 </div>
             </div>
         </div>
