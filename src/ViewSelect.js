@@ -26,7 +26,7 @@ const ViewSelect = ({tasks, setTasks, setEditEventID}) => {
             case 'month':
                 return <MonthView date={date} setDate={setDate} tasks={tasks} setTasks={setTasks} setSelectedView={setSelectedView}/>;
             case 'week':
-                return <WeekView date={date} setDate={setDate} tasks={tasks} setTasks={setTasks}/>;
+                return <WeekView date={date} setDate={setDate} tasks={tasks} setTasks={setTasks} setEditEventID={setEditEventID}/>;
             default:
                 return null;
         }

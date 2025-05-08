@@ -14,5 +14,34 @@ export const getIconColor = (color) => {
     const grayscale = 0.299 * r + 0.587 * g + 0.114 * b;
 
     // Return black or white based on the grayscale value
-    return grayscale > 127 ? '#4D4D4D' : '#fff';
+    return grayscale > 175 ? '#4D4D4D' : '#fff';
 };
+
+
+/**
+ * Converts a hex color and opacity level to an rgba color string.
+ * @param {string} hex - The hex color code (e.g., "#RRGGBB" or "#RGB").
+ * @param {number} opacity - The opacity level (0 to 1).
+ * @returns {string} The rgba color string (e.g., "rgba(r, g, b, opacity)").
+ */
+export const hexToRgba = (hex, opacity) => {
+    if (!/^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/.test(hex)) {
+        return '';
+    }
+
+    let r, g, b;
+
+    if (hex.length === 4) {
+        r = parseInt(hex[1] + hex[1], 16);
+        g = parseInt(hex[2] + hex[2], 16);
+        b = parseInt(hex[3] + hex[3], 16);
+    } else if (hex.length === 7) {
+        r = parseInt(hex.slice(1, 3), 16);
+        g = parseInt(hex.slice(3, 5), 16);
+        b = parseInt(hex.slice(5, 7), 16);
+    }
+
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+}
+
+export default hexToRgba;

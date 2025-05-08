@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import TaskBlock from './TaskBlock';
+import EditDeleteOption from './EditDeleteOption';
 
 
-const WeekView = ({ date, setDate ,tasks, setTasks}) => {
+
+const WeekView = ({ date, setDate ,tasks, setTasks, setEditEventID}) => {
     const [currentTimePosition, setCurrentTimePosition] = useState(0);
+    const [selectedLayer, setSelectedLayer] = useState(null); // Track the selected layer
+    const [activeBubble, setActiveBubble] = useState(null); // Track the active bubble (task eventID)
 
     // Generate time labels (24-hour format)
     const timeLabels = Array.from({ length: 24 }, (_, i) => 
@@ -23,6 +27,21 @@ const WeekView = ({ date, setDate ,tasks, setTasks}) => {
         return days;
     };
 
+    // Filter tasks for the current week
+    const week_tasks = tasks.filter((task) => {
+        const taskStartDate = new Date(task.startTime);
+        const startOfWeek = new Date(date);
+        startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); // Start of the week (Sunday)
+        startOfWeek.setHours(0, 0, 0, 0);
+
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(endOfWeek.getDate() + 7); // End of the week (Saturday)
+        endOfWeek.setHours(23, 59, 59, 999);
+
+        return taskStartDate >= startOfWeek && taskStartDate < endOfWeek &&
+        !task.crossADay; // Exclude crossADay tasks
+    });
+
     // Update current time indicator
     useEffect(() => {
         const updateCurrentTime = () => {
@@ -36,6 +55,82 @@ const WeekView = ({ date, setDate ,tasks, setTasks}) => {
 
         return () => clearInterval(interval);
     }, []);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            setSelectedLayer(null); // Deselect the layer
+            setActiveBubble(null); // Close any active bubble
+        };
+
+        document.addEventListener('click', handleClickOutside);
+        return () => {
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, []);
+
+    const handleLayerClick = (dayIndex, layerIndex) => {
+        if (selectedLayer?.dayIndex !== dayIndex || selectedLayer?.layerIndex !== layerIndex) {
+            // Select the clicked layer
+            setSelectedLayer({ dayIndex, layerIndex });
+            setActiveBubble(null); // Close any active bubble
+        }
+    };
+
+    const handleTaskBlockClick = (eventID, dayIndex, layerIndex) => {
+        if (selectedLayer?.dayIndex === dayIndex && selectedLayer?.layerIndex === layerIndex) {
+            // If the layer is already selected, toggle the bubble for the clicked task
+            setActiveBubble((prevBubble) => (prevBubble === eventID ? null : eventID));
+        } else {
+            // Select the layer but do not show the bubble
+            handleLayerClick(dayIndex, layerIndex);
+        }
+    };
+
+    const renderTaskBlock = (task, dayIndex, layerIndex) => {
+        const taskStart = new Date(task.startTime);
+        const taskEnd = new Date(task.endTime);
+        const top = ((taskStart.getHours() * 60 + taskStart.getMinutes()) / 1440) * 100; // Top position as a percentage of the day
+        const height = ((taskEnd - taskStart) / (1000 * 60 * 1440)) * 100; // Height as a percentage of the day
+
+        // If the task is a display-only copy, find the original task
+        const taskToPass = task.forDisplay
+            ? tasks.find((t) => t.eventID === task.eventID && t.crossADay)
+            : task;
+    
+        const editDeleteBubble =
+            activeBubble === task.eventID &&
+            selectedLayer?.dayIndex === dayIndex &&
+            selectedLayer?.layerIndex === layerIndex ? (
+                <EditDeleteOption
+                    setEditEventID={setEditEventID}
+                    eventID={task.eventID}
+                    setTasks={setTasks}
+                />
+            ) : null;
+    
+        return (
+            <div
+                key={task.eventID}
+                onClick={(e) => {
+                    e.stopPropagation(); // Prevent click from propagating to the document
+                    handleTaskBlockClick(task.eventID, dayIndex, layerIndex);
+                }}
+                >
+            <TaskBlock
+                key={task.eventID}
+                top={top}
+                height={height}
+                task={taskToPass}
+                showDetails={
+                    selectedLayer?.dayIndex === dayIndex &&
+                    selectedLayer?.layerIndex === layerIndex
+                }
+                editDeleteBubble={editDeleteBubble} // Pass the bubble as a prop
+                selectOnly={true} // Pass selectOnly prop to TaskBlock
+            />
+            </div>
+        );
+    };
 
     return (
         <div className="time-grid-container">
@@ -81,7 +176,85 @@ const WeekView = ({ date, setDate ,tasks, setTasks}) => {
                         <div className="current-time-dot" />
                     </div>
 
-                    
+                    {/* Render Task Layers */}
+                    <div>
+                        {Array(7).fill(null).map((_, dayIndex) => {
+                            // Get the date for the current day
+                            const currentDay = new Date(date);
+                            currentDay.setDate(currentDay.getDate() - currentDay.getDay() + dayIndex); // Start from Sunday
+
+                            // Filter tasks for the current day
+                            const dayTasks = week_tasks
+                                .filter((task) => {
+                                    const taskStartDate = new Date(task.startTime);
+                                    return taskStartDate.toDateString() === currentDay.toDateString();
+                                })
+                                .sort((a, b) => {
+                                    const startA = new Date(a.startTime).getTime();
+                                    const startB = new Date(b.startTime).getTime();
+
+                                    // First, sort by start time
+                                    if (startA !== startB) {
+                                        return startA - startB;
+                                    }
+
+                                    // If start times are the same, sort by duration (longer duration first)
+                                    const durationA = new Date(a.endTime).getTime() - startA;
+                                    const durationB = new Date(b.endTime).getTime() - startB;
+                                    return durationB - durationA;
+                                });
+
+                            // Organize tasks into layers for the current day
+                            const layers = [[]]; // Start with one layer
+                            dayTasks.forEach((task) => {
+                                const taskStart = new Date(task.startTime).getTime();
+                                const taskEnd = new Date(task.endTime).getTime();
+                                let placed = false;
+
+                                // Try to place the task in an existing layer
+                                for (let i = 0; i < layers.length; i++) {
+                                    const layer = layers[i];
+                                    const conflict = layer.some((layerTask) => {
+                                        const layerTaskStart = new Date(layerTask.startTime).getTime();
+                                        const layerTaskEnd = new Date(layerTask.endTime).getTime();
+                                        return taskStart < layerTaskEnd && taskEnd > layerTaskStart; // Check for overlap
+                                    });
+
+                                    if (!conflict) {
+                                        layer.push(task);
+                                        placed = true;
+                                        break;
+                                    }
+                                }
+
+                                // If the task couldn't be placed in any existing layer, create a new layer
+                                if (!placed) {
+                                    layers.push([task]);
+                                }
+                            });
+
+                            // Render layers for the current day
+                            return (
+                                <div key={dayIndex} style={{ position: 'absolute',top:0, left: `${(dayIndex / 7) * 100}%`, width: '14.28%',height:'100%' }}>
+                                    {layers.map((layer, layerIndex) => (
+                                        <div
+                                            key={layerIndex}
+                                            style={{
+                                                
+                                                marginLeft: `${10 + 20 * layerIndex}px`, // Adjust margins for layers
+                                            }}
+                                            onClick={(e) => {
+                                                e.stopPropagation(); // Prevent click from propagating to the document
+                                                handleLayerClick(dayIndex, layerIndex);
+                                            }}
+                                        >
+                                            {layer.map((task) => renderTaskBlock(task, dayIndex, layerIndex))}
+                                        </div>
+                                    ))}
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
         </div>

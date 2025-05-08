@@ -1,20 +1,24 @@
 import React from 'react';
-import { getIconColor } from './utils/colorUtils';
+import { getIconColor, hexToRgba } from './utils/colorUtils';
 import { Icon } from '@iconify/react';
 
-const TaskBlock = ({ top, height, task, showDetails, editDeleteBubble }) => {
+const TaskBlock = ({ top, height, task, showDetails, editDeleteBubble, selectOnly }) => {
+    const isClicked=editDeleteBubble?2:0;
+    
     const blockStyle = {
         position: 'absolute',
         top: `${top}%`,
         height: `${height}%`,
         width: '50px',
         backgroundColor: task.color,
-        zIndex: showDetails ? 3 : 1,
+        zIndex: showDetails ? 3+isClicked : 1,
         borderRadius: '5px',
-        boxShadow: '0 2px 5px rgba(0, 0, 0, 0.2)',
+        boxShadow: showDetails?'0 2px 10px rgba(0, 0, 0, 0.4)': '0 2px 5px rgba(0, 0, 0, 0.2)',
         display: 'flex',
         justifyContent: 'center',
         cursor: 'pointer',
+        translate: showDetails? '0px -3px' : 'none',
+        transition: 'translate 0.3s ease',
     };
 
     const iconStyle = {
@@ -33,7 +37,7 @@ const TaskBlock = ({ top, height, task, showDetails, editDeleteBubble }) => {
             </div>
 
             {/* Details */}
-            {showDetails && (
+            {showDetails && !selectOnly && (
                 <div
                     style={{
                         position: 'absolute',
@@ -42,17 +46,19 @@ const TaskBlock = ({ top, height, task, showDetails, editDeleteBubble }) => {
                         minHeight: `${height}%`,
                         width: 'fit-content',
                         marginLeft: '40px',
-                        backgroundColor: 'rgba(171, 168, 168, 0.28)',
-                        backdropFilter: 'blur(3px)',
+                        backgroundColor: hexToRgba(task.color, 0.2),
+                        backdropFilter: 'blur(10px)',
                         padding: '0px 30px',
                         paddingTop: '2vh',
                         paddingBottom: '2vh',
                         borderRadius: '5px',
-                        zIndex: showDetails ? 2 : 0,
-                        border: '2px solid #ccc',
+                        zIndex: showDetails ? 2+isClicked : 0,
+                        border: '',
+                        translate: showDetails? '0px -3px' : 'none',
+                        transition: 'translate 0.3s ease',
                     }}
                 >
-                    {height >= 3 &&
+                    {(isClicked || height >= 3) &&
                     (<h5>
                         {/* Task Name */}
                         {task.eventName}
@@ -66,7 +72,7 @@ const TaskBlock = ({ top, height, task, showDetails, editDeleteBubble }) => {
                         )}
                     </h5>)}
 
-                    {(height>=5 && 
+                    {((isClicked || height>=5) && 
                         <>
                         {/* Task Time */}
                         <div style={{ marginTop: '10px', fontSize: '12px', color: '#555' }}>
@@ -134,16 +140,33 @@ const TaskBlock = ({ top, height, task, showDetails, editDeleteBubble }) => {
 
             {/* Render EditDeleteOption Bubble */}
             {editDeleteBubble && (
+                <>
+                {/* Arrow*/}
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: `${top + Math.min(3, height / 2)-0.6}%`,
+                        marginLeft: '10px',
+                        zIndex: 5,
+                        width: '0px',
+                        height: '0px',
+                        borderBottom: '25px solid lightgray',
+                        borderLeft: '15px solid transparent',
+                        borderRight: '15px solid transparent',
+                    }}
+                ></div>
+                {/* EditDeleteOption Bubble */}
                 <div
                     style={{
                         position: 'absolute',
                         top: `${top + Math.min(3, height / 2)}%`,
-                        marginLeft:'25px',
-                        zIndex: 3,
+                        marginLeft:'-25px',
+                        zIndex: 5,
                     }}
                 >
                     {editDeleteBubble}
                 </div>
+                </>
             )}
         </>
     );
