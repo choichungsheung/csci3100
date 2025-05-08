@@ -37,7 +37,8 @@ const TaskBlock = ({ top, height, task, showDetails, editDeleteBubble, selectOnl
             </div>
 
             {/* Details */}
-            {showDetails && !selectOnly && (
+            {/* show when layer is selected in day view(!selectOnly) } or  the task is clicked twice(isClicked) in week view(selectOnly) */}
+            {((showDetails && !selectOnly)||(selectOnly&&Boolean(isClicked))) && (
                 <div
                     style={{
                         position: 'absolute',
