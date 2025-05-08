@@ -62,14 +62,14 @@ const WeekView = ({ date, setDate ,tasks, setTasks, setEditEventID}) => {
     useEffect(() => {
         if (currentTimePosition !== null && !hasScrolledToCurrentTime.current) {
             if (dayGridRef.current) {
-                const containerHeight = dayGridRef.current.offsetHeight;
+                const containerHeight = 1440;
                 const scrollPosition = (currentTimePosition / 100) * containerHeight;
                 dayGridRef.current.scrollTo({
                     top: scrollPosition,
                     behavior: 'smooth', // Smooth scrolling
                 });
             }
-            hasScrolledToCurrentTime.current = true; // Mark the scroll as completed
+            hasScrolledToCurrentTime.current = true; // Mark the scroll as completed    
         }
     }, [currentTimePosition]); // Trigger when currentTimePosition is calculated
 

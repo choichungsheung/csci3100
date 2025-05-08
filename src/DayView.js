@@ -34,7 +34,7 @@ const DayView = ({ date, setDate ,tasks, setTasks, setEditEventID}) => {
     useEffect(() => {
         if (currentTimePosition !== null && !hasScrolledToCurrentTime.current) {
             if (dayGridRef.current) {
-                const containerHeight = dayGridRef.current.offsetHeight;
+                const containerHeight = 1440;
                 const scrollPosition = (currentTimePosition / 100) * containerHeight;
                 dayGridRef.current.scrollTo({
                     top: scrollPosition,
