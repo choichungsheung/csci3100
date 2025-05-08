@@ -36,7 +36,7 @@ const predefinedIcons = [
     "lineicons:python",
 ];
 
-const predefinedColors = ['#DD0E0E', '#29E510', '#116FE8', '#ECE518', '#9B42D7']; // Default colors
+const predefinedColors = ['#E96992', '#69E972', '#69B0E9', '#E3DC68', '#C769E9']; // Default colors
 
 
 
