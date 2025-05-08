@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import TaskBlock from './TaskBlock';
 import EditDeleteOption from './EditDeleteOption';
 
 
 
 const WeekView = ({ date, setDate ,tasks, setTasks, setEditEventID}) => {
-    const [currentTimePosition, setCurrentTimePosition] = useState(0);
+    const [currentTimePosition, setCurrentTimePosition] = useState(null);
     const [selectedLayer, setSelectedLayer] = useState(null); // Track the selected layer
     const [activeBubble, setActiveBubble] = useState(null); // Track the active bubble (task eventID)
+    const dayGridRef = useRef(null); // Ref for the day grid container
+    const hasScrolledToCurrentTime = useRef(false); // Track if the scroll has already occurred
 
     // Generate time labels (24-hour format)
     const timeLabels = Array.from({ length: 24 }, (_, i) => 
@@ -55,6 +57,21 @@ const WeekView = ({ date, setDate ,tasks, setTasks, setEditEventID}) => {
 
         return () => clearInterval(interval);
     }, []);
+
+    // Auto-scroll to the current time on page load
+    useEffect(() => {
+        if (currentTimePosition !== null && !hasScrolledToCurrentTime.current) {
+            if (dayGridRef.current) {
+                const containerHeight = dayGridRef.current.offsetHeight;
+                const scrollPosition = (currentTimePosition / 100) * containerHeight;
+                dayGridRef.current.scrollTo({
+                    top: scrollPosition,
+                    behavior: 'smooth', // Smooth scrolling
+                });
+            }
+            hasScrolledToCurrentTime.current = true; // Mark the scroll as completed
+        }
+    }, [currentTimePosition]); // Trigger when currentTimePosition is calculated
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -133,7 +150,7 @@ const WeekView = ({ date, setDate ,tasks, setTasks, setEditEventID}) => {
     };
 
     return (
-        <div className="time-grid-container">
+        <div className="time-grid-container" ref={dayGridRef}>
             {/* Time axis */}
             <div className="time-axis">
                 {timeLabels.map((label) => (
