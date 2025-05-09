@@ -6,12 +6,57 @@ import AddTask from './AddTask';
 import EditTask from './EditTask';
 import Cookies from 'js-cookie';
 import fetchTasks from './utils/fetchTasks'; // Import the utility function
+import fetchNotificationTasks from './utils/fetchNotificationTasks';
 
 const Main = ({ setLoggedIn }) => {
     const [showNewEventForm, setShowNewEventForm] = useState(false);
     const [editEventID, setEditEventID] = useState(null);
     const [tasks, setTasks] = useState([]); // State to store all tasks
+    const [notificationPermission, setNotificationPermission] = useState(false);
 
+    const requestNotificationPermission = async () => {
+        if (!("Notification" in window)) {
+            console.log("This browser does not support notifications.");
+            return false;
+        }
+        const permission = await Notification.requestPermission();
+        return permission === "granted";
+    };
+
+    const showNotification = (notificationTasks) => {
+        if (Notification.permission === "granted") {
+            new Notification(notificationTasks.eventName || 'Untitled Event', {
+                body: `Starts at ${new Date(notificationTasks.startTime).toLocaleTimeString()}`,
+                icon: notificationTasks.icon, // Optional: Add an icon
+            });
+        }
+    };
+
+    // Check for notification tasks periodically
+    useEffect(() => {
+        const initNotifications = async () => {
+            const granted = await requestNotificationPermission();
+            setNotificationPermission(granted);
+
+            const checkNotifications = async () => {
+                if (!granted) return; // Skip if permission is not granted
+                const notificationTasks = await fetchNotificationTasks();
+                notificationTasks.forEach(task => {
+                    const notificationTime = new Date(task.notificationTime);
+                    const now = new Date();
+                    if (notificationTime > now && notificationTime - now <= 1 * 60 * 1000) {
+                        showNotification(task);
+                    }
+                });
+            };
+
+            checkNotifications();
+            const interval = setInterval(checkNotifications, 60 * 1000);
+            return () => clearInterval(interval);
+        };
+
+        initNotifications();
+    }, [showNotification]);
     // Fetch tasks when the page loads
     useEffect(() => {
         fetchTasks(setTasks); // Use the utility function

@@ -2,7 +2,7 @@ import React from 'react';
 import { Icon } from '@iconify/react'; // Import Iconify for rendering icons
 import { getIconColor } from './utils/colorUtils'; // Import the utility function
 
-const CalendarBlock = ({ date, setDate, currentDay, tasks, setTasks, setSelectedView }) => {
+const CalendarBlock = ({ date, setDate, currentDay, tasks, setTasks, setSelectedView, isLastMonth, isNextMonth }) => {
     if (currentDay === 0) {
         return null; // Return nothing for empty blocks
     }
@@ -33,6 +33,15 @@ const CalendarBlock = ({ date, setDate, currentDay, tasks, setTasks, setSelected
     // Filter tasks that start on the date represented by the CalendarBlock
     const blockDate = new Date(date);
     blockDate.setDate(currentDay); // Replace the day with currentDay
+
+    if(isLastMonth){
+        blockDate.setMonth(blockDate.getMonth() - 1);
+    }
+
+    if(isNextMonth){
+        blockDate.setMonth(blockDate.getMonth() + 1);
+    }
+
     const tasksForBlock = tasks.filter((task) => {
         const taskStartDate = new Date(task.startTime);
         return (
