@@ -70,7 +70,7 @@ const WeekView = ({ date, setDate ,tasks, setTasks, setEditEventID, setSelectedV
         const updateCurrentTime = () => {
             const now = new Date();
             const minutes = now.getHours() * 60 + now.getMinutes();
-            setCurrentTimePosition((minutes / 1440) * 100); // 1440 = minutes in a day
+            setCurrentTimePosition(((minutes + 68) / 1530) * 100); // 1440 = minutes in a day
             
             // Find today in the week view
             const weekDays = getWeekDays();
@@ -110,18 +110,18 @@ const WeekView = ({ date, setDate ,tasks, setTasks, setEditEventID, setSelectedV
     });
 
     // Update current time indicator
-    useEffect(() => {
-        const updateCurrentTime = () => {
-            const now = new Date();
-            const minutes = now.getHours() * 60 + now.getMinutes();
-            setCurrentTimePosition((minutes / 1440) * 100); // 1440 = minutes in a day
-        };
+    // useEffect(() => {
+    //     const updateCurrentTime = () => {
+    //         const now = new Date();
+    //         const minutes = now.getHours() * 60 + now.getMinutes();
+    //         setCurrentTimePosition((minutes / 1440) * 100); // 1440 = minutes in a day
+    //     };
 
-        updateCurrentTime();
-        const interval = setInterval(updateCurrentTime, 60000); // Update every minute
+    //     updateCurrentTime();
+    //     const interval = setInterval(updateCurrentTime, 60000); // Update every minute
 
-        return () => clearInterval(interval);
-    }, []);
+    //     return () => clearInterval(interval);
+    // }, []);
 
     // Auto-scroll to the current time on page load
     useEffect(() => {
@@ -250,7 +250,7 @@ const WeekView = ({ date, setDate ,tasks, setTasks, setEditEventID, setSelectedV
                         <div 
                             className="current-time-indicator"
                             style={{ 
-                                top: `${currentTimePosition + 4 }%`,
+                                top: `${currentTimePosition }%`,
                                 left: `${(todayIndex / 7) * 100}%`,
                                 width: `${100 / 7}%` // Only span one column width
                             }}
