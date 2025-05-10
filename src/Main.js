@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Search from './Search';
 import ViewSelect from './ViewSelect';
 import Logout from './Logout';
@@ -13,6 +13,7 @@ const Main = ({ setLoggedIn }) => {
     const [editEventID, setEditEventID] = useState(null);
     const [tasks, setTasks] = useState([]); // State to store all tasks
     const [notificationPermission, setNotificationPermission] = useState(false);
+    const notifiedTasks = useRef(new Set()); // Track tasks that have already triggered notifications
 
     const requestNotificationPermission = async () => {
         if (!("Notification" in window)) {
@@ -23,40 +24,71 @@ const Main = ({ setLoggedIn }) => {
         return permission === "granted";
     };
 
-    const showNotification = (notificationTasks) => {
+    const showNotification = (task) => {
         if (Notification.permission === "granted") {
-            new Notification(notificationTasks.eventName || 'Untitled Event', {
-                body: `Starts at ${new Date(notificationTasks.startTime).toLocaleTimeString()}`,
-                icon: notificationTasks.icon, // Optional: Add an icon
+            new Notification(task.eventName || 'Untitled Event', {
+                body: `Starts at ${new Date(task.startTime).toLocaleTimeString()}`,
+                icon: task.icon, // Optional: Add an icon
             });
+            notifiedTasks.current.add(task.eventID); // Mark the task as notified
+            console.log('Notification shown for task:', task.eventName);
         }
     };
 
-    // Check for notification tasks periodically
+    // Notification system
     useEffect(() => {
+        let interval = null;
+
         const initNotifications = async () => {
             const granted = await requestNotificationPermission();
             setNotificationPermission(granted);
 
-            const checkNotifications = async () => {
-                if (!granted) return; // Skip if permission is not granted
-                const notificationTasks = await fetchNotificationTasks();
-                notificationTasks.forEach(task => {
+            if (!granted) return; // Skip if permission is not granted
+
+            const checkNotifications = () => {
+                console.log('Checking notifications...'); // Debugging log
+                const now = new Date();
+                const currentDate = now.toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
+                const currentHour = now.getHours();
+                const currentMinute = now.getMinutes();
+
+                // Filter tasks for notifications
+                const notification_tasks = tasks.filter(task => !task.forDisplay);
+
+                // Check each task's notification time
+                notification_tasks.forEach(task => {
                     const notificationTime = new Date(task.notificationTime);
-                    const now = new Date();
-                    if (notificationTime > now && notificationTime - now <= 1 * 60 * 1000) {
+                    const taskDate = notificationTime.toISOString().split('T')[0];
+                    const taskHour = notificationTime.getHours();
+                    const taskMinute = notificationTime.getMinutes();
+
+                    if (
+                        taskDate === currentDate &&
+                        taskHour === currentHour &&
+                        taskMinute === currentMinute &&
+                        !notifiedTasks.current.has(task.eventID) // Ensure the task hasn't been notified yet
+                    ) {
                         showNotification(task);
+                        
                     }
                 });
             };
 
+            // Run the check every minute
             checkNotifications();
-            const interval = setInterval(checkNotifications, 60 * 1000);
-            return () => clearInterval(interval);
+            interval = setInterval(checkNotifications, 5 * 1000); // Check every minute
+            console.log('create interval');
         };
 
         initNotifications();
-    }, [showNotification]);
+
+        // Cleanup interval when the component unmounts
+        return () => {
+            if (interval) clearInterval(interval);
+            console.log('clear interval');
+        };
+    }, [tasks]); // Re-run when tasks change
+
     // Fetch tasks when the page loads
     useEffect(() => {
         fetchTasks(setTasks); // Use the utility function
