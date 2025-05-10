@@ -14,7 +14,7 @@ const WeekView = ({ date, setDate ,tasks, setTasks, setEditEventID, setSelectedV
     const [todayIndex, setTodayIndex] = useState(-1);
 
     // Generate time labels (24-hour format)
-    const timeLabels = Array.from({ length: 25 }, (_, i) => 
+    const timeLabels = Array.from({ length: 24 }, (_, i) => 
         `${i.toString().padStart(2, '0')}:00`
     );
 
@@ -48,7 +48,9 @@ const WeekView = ({ date, setDate ,tasks, setTasks, setEditEventID, setSelectedV
             const dayNumber = dayDate.getDate(); // Get the day number (1-31)
     
             weekBlocks.push(
-                <div key={`day-${i}`} className="CalendarBlock-week">
+                <div key={`day-${i}`} className="CalendarBlock" style={{
+                    position: 'absolute',top:0, left: `${(i / 7) * 100}%`, width: '14.28%',
+                }}>
                     <CalendarBlock
                         date={date}
                         setDate={setDate}
@@ -57,6 +59,7 @@ const WeekView = ({ date, setDate ,tasks, setTasks, setEditEventID, setSelectedV
                         setTasks={setTasks}
                         setSelectedView={setSelectedView}
                         blockDate={dayDate} // Pass the actual date for this block
+                        maxTaskDisplay={5} // Limit to 5 tasks per block
                     />
                 </div>
             );
@@ -70,7 +73,7 @@ const WeekView = ({ date, setDate ,tasks, setTasks, setEditEventID, setSelectedV
         const updateCurrentTime = () => {
             const now = new Date();
             const minutes = now.getHours() * 60 + now.getMinutes();
-            setCurrentTimePosition(((minutes + 68) / 1530) * 100); // 1440 = minutes in a day
+            setCurrentTimePosition(((minutes ) / 1440) * 100); // 1440 = minutes in a day
             
             // Find today in the week view
             const weekDays = getWeekDays();
@@ -171,7 +174,7 @@ const WeekView = ({ date, setDate ,tasks, setTasks, setEditEventID, setSelectedV
     const renderTaskBlock = (task, dayIndex, layerIndex) => {
         const taskStart = new Date(task.startTime);
         const taskEnd = new Date(task.endTime);
-        const top = (((taskStart.getHours() * 60 + taskStart.getMinutes() + 68) / 1530) * 100); // Top position as a percentage of the day
+        const top = (((taskStart.getHours() * 60 + taskStart.getMinutes()) / 1440) * 100); // Top position as a percentage of the day
         const height = ((taskEnd - taskStart) / (1000 * 60 * 1440)) * 100; // Height as a percentage of the day
 
         // If the task is a display-only copy, find the original task
@@ -215,9 +218,11 @@ const WeekView = ({ date, setDate ,tasks, setTasks, setEditEventID, setSelectedV
     };
 
     return (
-        <div className="time-grid-container" ref={dayGridRef}>
+        <>
+        
+        <div className="time-grid-container-week" ref={dayGridRef} style={{}}>
             {/* Time axis */}
-            <div className="time-axis-week">
+            <div className="time-axis">
                 {timeLabels.map((label) => (
                     <div key={label} className="time-label">
                         {label}
@@ -229,14 +234,11 @@ const WeekView = ({ date, setDate ,tasks, setTasks, setEditEventID, setSelectedV
             {/* Week grid */}
             <div className="time-grid week-grid">
                 {/* Header */}
-                <div className="time-grid-header">
                 
-                {renderWeek()}
-            
-                </div>
+
 
                 {/* Time grid */}
-                <div className="time-grid-week">
+                <div className="time-grid">
                     {timeLabels.map((_, index) => (
                         <div key={index} className="time-grid-row">
                             {Array(7).fill(null).map((_, dayIndex) => (
@@ -341,6 +343,7 @@ const WeekView = ({ date, setDate ,tasks, setTasks, setEditEventID, setSelectedV
                 </div>
             </div>
         </div>
+        </>
     );
 };
 

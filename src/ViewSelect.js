@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import DayView from './DayView';
 import MonthView from './MonthView';
 import WeekView from './WeekView';
+import CalendarBlock from './CalendarBlock';
+
 
 const ViewSelect = ({tasks, setTasks, setEditEventID}) => {
     const [selectedView, setSelectedView] = useState('day'); // Default to 'day'
@@ -142,6 +144,43 @@ const ViewSelect = ({tasks, setTasks, setEditEventID}) => {
 
     const isCurrent = isInCurrent();
 
+    const renderWeek = () => {
+        // Get the day of the week for the given date (0 = Sunday, 6 = Saturday)
+        const currentDayOfWeek = date.getDay();
+        
+        // Calculate the start of the week (assuming week starts on Sunday)
+        const startOfWeek = new Date(date);
+        startOfWeek.setDate(date.getDate() - currentDayOfWeek); // Move to Sunday of the current week
+    
+        const weekBlocks = [];
+    
+        // Render 7 blocks for the week
+        for (let i = 0; i < 7; i++) {
+            const dayDate = new Date(startOfWeek);
+            dayDate.setDate(startOfWeek.getDate() + i); // Increment by i days
+            const dayNumber = dayDate.getDate(); // Get the day number (1-31)
+    
+            weekBlocks.push(
+                <div key={`day-${i}`} className="CalendarBlock" style={{
+                    width: '100%',zIndex:5,height:'100%'
+                }}>
+                    <CalendarBlock
+                        date={date}
+                        setDate={setDate}
+                        currentDay={dayNumber}
+                        tasks={tasks}
+                        setTasks={setTasks}
+                        setSelectedView={setSelectedView}
+                        blockDate={dayDate} // Pass the actual date for this block
+                        maxTaskDisplay={5} // Limit to 5 tasks per block
+                    />
+                </div>
+            );
+        }
+    
+        return weekBlocks;
+    }
+
     return (
         <div className="calendar-container">
             <div className="calendar-header">
@@ -198,7 +237,8 @@ const ViewSelect = ({tasks, setTasks, setEditEventID}) => {
             )}
             
             {selectedView === 'week' && (
-                <div className="weekday-header-week">
+                <div style={{overflow:'auto'}}>
+                <div className="weekday-header" style={{ marginLeft:'60px',minWidth:'1050px' }}>
                     <div>Sun</div>
                     <div>Mon</div>
                     <div>Tue</div>
@@ -206,6 +246,10 @@ const ViewSelect = ({tasks, setTasks, setEditEventID}) => {
                     <div>Thu</div>
                     <div>Fri</div>
                     <div>Sat</div>
+                </div>
+                <div style={{marginLeft:'60px' ,display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '5px', height:'110px', minWidth:'1050px'}}>
+                    {renderWeek()}
+                </div>
                 </div>
             )}
 

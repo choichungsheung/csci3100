@@ -2,12 +2,14 @@ import React from 'react';
 import { Icon } from '@iconify/react'; // Import Iconify for rendering icons
 import { getIconColor } from './utils/colorUtils'; // Import the utility function
 
-const CalendarBlock = ({ date, setDate, currentDay, tasks, setTasks, setSelectedView, isLastMonth, isNextMonth }) => {
+const CalendarBlock = ({ date, setDate, currentDay, tasks, setTasks, setSelectedView, isLastMonth, isNextMonth, maxTaskDisplay }) => {
     if (currentDay === 0) {
         return null; // Return nothing for empty blocks
     }
 
     tasks = tasks.filter((task) => !task.crossADay);
+
+    maxTaskDisplay = maxTaskDisplay || 10; // Default to 10 if not provided
 
     const handleClick = () => {
         // Create a new date object with the same year and month, but replace the day with currentDay
@@ -88,7 +90,7 @@ const CalendarBlock = ({ date, setDate, currentDay, tasks, setTasks, setSelected
                 }}
             >
                 {/* individual icon squares*/ }
-                {tasksForBlock.slice(0, 10).map((task, index) => (
+                {tasksForBlock.slice(0, maxTaskDisplay).map((task, index) => (
                     <div
                         key={index}
                         style={{
@@ -110,7 +112,7 @@ const CalendarBlock = ({ date, setDate, currentDay, tasks, setTasks, setSelected
                         />
                     </div>
                 ))}
-                {tasksForBlock.length > 10 && (
+                {tasksForBlock.length > maxTaskDisplay && (
                     <div
                         style={{
                             width: '15px',

@@ -216,8 +216,8 @@ const DayView = ({ date, setDate ,tasks, setTasks, setEditEventID}) => {
     return (
         <div className="time-grid-container"  ref={dayGridRef}>
             {/* Time axis */}
-            <div className="time-axis-day">
-                {timeAxisLabels.map((label) => (
+            <div className="time-axis">
+                {timeLabels.map((label) => (
                     <div key={label} className="time-label">
                         {label}
                     </div>
