@@ -232,7 +232,7 @@ const WeekView = ({ date, setDate ,tasks, setTasks, setEditEventID, setSelectedV
 
 
             {/* Week grid */}
-            <div className="time-grid week-grid">
+            <div className="time-grid week-grid" style={{marginTop: '30px'}}>
                 {/* Header */}
                 
 

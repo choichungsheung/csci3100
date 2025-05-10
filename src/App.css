@@ -347,7 +347,6 @@
 
 .time-axis {
   min-width: 60px;
-  border-right: 1px solid var(--border-color);
   background-color: white;
   height: max-content;
 }
@@ -372,13 +371,12 @@
 }
 
 .time-grid-row {
-  border-bottom: 1px solid var(--border-color);
+  border: 1px solid var(--border-color);
+  border-bottom: 1px solid transparent;
   position: relative;
 }
 
-.time-grid-row:last-child {
-  border-bottom: none;
-}
+
 
 .time-grid-header {
   position: sticky;

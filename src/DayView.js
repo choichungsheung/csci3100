@@ -225,7 +225,7 @@ const DayView = ({ date, setDate ,tasks, setTasks, setEditEventID}) => {
             </div>
 
             {/* Day grid */}
-            <div className="time-grid" ref={dayGridRef}>
+            <div className="time-grid" ref={dayGridRef} style={{marginTop: '30px'}}>
                 {/* Header */}
                 {/*<div className="time-grid-header">
                     {date.toLocaleDateString('en-US', { 
