@@ -46,7 +46,7 @@ const getLocalDate = (date) => {
     return adjustedDate.toISOString().split('T')[0]; // Return the date in YYYY-MM-DD format
 };
 
-const EditTask = ({ onClose,editEventID, tasks, setTasks}) => {
+const EditTask = ({ onClose,editEventID, tasks, setTasks, notifiedTasks}) => {
     const currentHour = new Date().getHours(); // Get the current hour
     const [startHour, setStartHour] = useState(currentHour); // Default hour to current hour
     const [startMinute, setStartMinute] = useState(0); // Default minute to 00
@@ -384,6 +384,8 @@ const EditTask = ({ onClose,editEventID, tasks, setTasks}) => {
 
                 // Fetch all tasks from the database and update the frontend state
                 await fetchTasks(setTasks);
+
+                notifiedTasks.current=new Set();
 
                 onClose(); // Close the form
             } else {

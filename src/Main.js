@@ -209,7 +209,7 @@ const Main = ({ setLoggedIn }) => {
                     >
                         &times;
                     </button>
-                    <EditTask onClose={() => setEditEventID(null)} editEventID={editEventID} tasks={tasks} setTasks={setTasks}/>
+                    <EditTask onClose={() => setEditEventID(null)} editEventID={editEventID} tasks={tasks} setTasks={setTasks} notifiedTasks={notifiedTasks}/>
                 </div>
             )}
         </div>
