@@ -1,15 +1,17 @@
 import React, { useEffect, useState, useRef } from 'react';
 import TaskBlock from './TaskBlock';
 import EditDeleteOption from './EditDeleteOption';
+import CalendarBlock from './CalendarBlock';
 
 
 
-const WeekView = ({ date, setDate ,tasks, setTasks, setEditEventID}) => {
+const WeekView = ({ date, setDate ,tasks, setTasks, setEditEventID, setSelectedView}) => {
     const [currentTimePosition, setCurrentTimePosition] = useState(null);
     const [selectedLayer, setSelectedLayer] = useState(null); // Track the selected layer
     const [activeBubble, setActiveBubble] = useState(null); // Track the active bubble (task eventID)
     const dayGridRef = useRef(null); // Ref for the day grid container
     const hasScrolledToCurrentTime = useRef(false); // Track if the scroll has already occurred
+    const [todayIndex, setTodayIndex] = useState(-1);
 
     // Generate time labels (24-hour format)
     const timeLabels = Array.from({ length: 24 }, (_, i) => 
@@ -29,6 +31,72 @@ const WeekView = ({ date, setDate ,tasks, setTasks, setEditEventID}) => {
         return days;
     };
 
+    const renderWeek = () => {
+        // Get the day of the week for the given date (0 = Sunday, 6 = Saturday)
+        const currentDayOfWeek = date.getDay();
+        
+        // Calculate the start of the week (assuming week starts on Sunday)
+        const startOfWeek = new Date(date);
+        startOfWeek.setDate(date.getDate() - currentDayOfWeek); // Move to Sunday of the current week
+    
+        const weekBlocks = [];
+    
+        // Render 7 blocks for the week
+        for (let i = 0; i < 7; i++) {
+            const dayDate = new Date(startOfWeek);
+            dayDate.setDate(startOfWeek.getDate() + i); // Increment by i days
+            const dayNumber = dayDate.getDate(); // Get the day number (1-31)
+    
+            weekBlocks.push(
+                <div key={`day-${i}`} className="CalendarBlock" style={{
+                    position: 'absolute',top:0, left: `${(i / 7) * 100}%`, width: '14.28%',
+                }}>
+                    <CalendarBlock
+                        date={date}
+                        setDate={setDate}
+                        currentDay={dayNumber}
+                        tasks={tasks}
+                        setTasks={setTasks}
+                        setSelectedView={setSelectedView}
+                        blockDate={dayDate} // Pass the actual date for this block
+                        maxTaskDisplay={5} // Limit to 5 tasks per block
+                    />
+                </div>
+            );
+        }
+    
+        return weekBlocks;
+    }
+
+    // Update current time indicator and check if today is in the current week view
+    useEffect(() => {
+        const updateCurrentTime = () => {
+            const now = new Date();
+            const minutes = now.getHours() * 60 + now.getMinutes();
+            setCurrentTimePosition(((minutes ) / 1440) * 100); // 1440 = minutes in a day
+            
+            // Find today in the week view
+            const weekDays = getWeekDays();
+            const today = new Date();
+            
+            // Reset time parts for accurate date comparison
+            today.setHours(0, 0, 0, 0);
+            
+            const todayIdx = weekDays.findIndex(day => {
+                const compareDay = new Date(day);
+                compareDay.setHours(0, 0, 0, 0);
+                return compareDay.getTime() === today.getTime();
+            });
+            
+            setTodayIndex(todayIdx);
+        };
+
+        updateCurrentTime();
+        const interval = setInterval(updateCurrentTime, 60000); // Update every minute
+
+        return () => clearInterval(interval);
+    }, [date]); // Re-run when date changes
+
     // Filter tasks for the current week
     const week_tasks = tasks.filter((task) => {
         const taskStartDate = new Date(task.startTime);
@@ -45,18 +113,18 @@ const WeekView = ({ date, setDate ,tasks, setTasks, setEditEventID}) => {
     });
 
     // Update current time indicator
-    useEffect(() => {
-        const updateCurrentTime = () => {
-            const now = new Date();
-            const minutes = now.getHours() * 60 + now.getMinutes();
-            setCurrentTimePosition((minutes / 1440) * 100); // 1440 = minutes in a day
-        };
+    // useEffect(() => {
+    //     const updateCurrentTime = () => {
+    //         const now = new Date();
+    //         const minutes = now.getHours() * 60 + now.getMinutes();
+    //         setCurrentTimePosition((minutes / 1440) * 100); // 1440 = minutes in a day
+    //     };
 
-        updateCurrentTime();
-        const interval = setInterval(updateCurrentTime, 60000); // Update every minute
+    //     updateCurrentTime();
+    //     const interval = setInterval(updateCurrentTime, 60000); // Update every minute
 
-        return () => clearInterval(interval);
-    }, []);
+    //     return () => clearInterval(interval);
+    // }, []);
 
     // Auto-scroll to the current time on page load
     useEffect(() => {
@@ -106,7 +174,7 @@ const WeekView = ({ date, setDate ,tasks, setTasks, setEditEventID}) => {
     const renderTaskBlock = (task, dayIndex, layerIndex) => {
         const taskStart = new Date(task.startTime);
         const taskEnd = new Date(task.endTime);
-        const top = ((taskStart.getHours() * 60 + taskStart.getMinutes()) / 1440) * 100; // Top position as a percentage of the day
+        const top = (((taskStart.getHours() * 60 + taskStart.getMinutes()) / 1440) * 100); // Top position as a percentage of the day
         const height = ((taskEnd - taskStart) / (1000 * 60 * 1440)) * 100; // Height as a percentage of the day
 
         // If the task is a display-only copy, find the original task
@@ -150,7 +218,9 @@ const WeekView = ({ date, setDate ,tasks, setTasks, setEditEventID}) => {
     };
 
     return (
-        <div className="time-grid-container" ref={dayGridRef}>
+        <>
+        
+        <div className="time-grid-container-week" ref={dayGridRef} style={{}}>
             {/* Time axis */}
             <div className="time-axis">
                 {timeLabels.map((label) => (
@@ -160,20 +230,12 @@ const WeekView = ({ date, setDate ,tasks, setTasks, setEditEventID}) => {
                 ))}
             </div>
 
+
             {/* Week grid */}
-            <div className="time-grid week-grid">
+            <div className="time-grid week-grid" style={{marginTop: '30px'}}>
                 {/* Header */}
-                <div className="time-grid-header">
-                    {getWeekDays().map((day, index) => (
-                        <div key={index} className="week-column">
-                            {day.toLocaleDateString('en-US', { 
-                                weekday: 'short', 
-                                month: 'short', 
-                                day: 'numeric' 
-                            })}
-                        </div>
-                    ))}
-                </div>
+                
+
 
                 {/* Time grid */}
                 <div className="time-grid">
@@ -186,12 +248,18 @@ const WeekView = ({ date, setDate ,tasks, setTasks, setEditEventID}) => {
                     ))}
 
                     {/* Current time indicator */}
-                    <div 
-                        className="current-time-indicator"
-                        style={{ top: `${currentTimePosition}%` }}
-                    >
-                        <div className="current-time-dot" />
-                    </div>
+                    {todayIndex !== -1 && (
+                        <div 
+                            className="current-time-indicator"
+                            style={{ 
+                                top: `${currentTimePosition }%`,
+                                left: `${(todayIndex / 7) * 100}%`,
+                                width: `${100 / 7}%` // Only span one column width
+                            }}
+                        >
+                            <div className="current-time-dot" />
+                        </div>
+                    )}
 
                     {/* Render Task Layers */}
                     <div>
@@ -275,6 +343,7 @@ const WeekView = ({ date, setDate ,tasks, setTasks, setEditEventID}) => {
                 </div>
             </div>
         </div>
+        </>
     );
 };
 
