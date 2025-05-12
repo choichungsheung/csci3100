@@ -211,6 +211,31 @@
   box-shadow: none;
 }
 
+.CalendarBlock-week {
+  flex: 1;
+  /* aspect-ratio: 4 / 3; */
+  /* max-width: 300px; */
+  height: 130px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: auto;
+  box-shadow: 0 1px 3px 0 rgba(60, 64, 67, 0.1);
+  padding: 10px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 400; 
+}
+.CalendarBlock-week:not(.empty):hover {
+  background-color: rgba(237, 213, 255);
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+/* Style for days from other months */
+.CalendarBlock.other-month {
+  color: #aaaaaa;
+  opacity: 0.7;
+}
+
 .calendar-header {
   display: flex;
   align-items: center;
@@ -296,6 +321,7 @@
   padding-right: 5px;
   overflow-y: auto;
   height: calc(100vh - 138px);
+  scrollbar-width: none;
 }
 
 /* Time Grid Styles */
@@ -306,13 +332,22 @@
   /* border: 1px solid var(--border-color); */
   /* border-radius: 8px; */
   overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.time-grid-container-week {
+  display: flex;
+  height: calc(100vh - 248px);
+  /* margin-top: 8px; */
+  /* border: 1px solid var(--border-color); */
+  /* border-radius: 8px; */
+  overflow-y: auto;
+  scrollbar-width: none;
 }
 
 .time-axis {
   min-width: 60px;
-  border-right: 1px solid var(--border-color);
   background-color: white;
-  padding-top: 60px; /* Space for header */
   height: max-content;
 }
 
@@ -336,13 +371,12 @@
 }
 
 .time-grid-row {
-  border-bottom: 1px solid var(--border-color);
+  border: 1px solid var(--border-color);
+  border-bottom: 1px solid transparent;
   position: relative;
 }
 
-.time-grid-row:last-child {
-  border-bottom: none;
-}
+
 
 .time-grid-header {
   position: sticky;
@@ -590,4 +624,3 @@
 .login-container .form-control:focus::placeholder {
   color: transparent;
 }
-

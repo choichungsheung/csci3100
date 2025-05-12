@@ -16,6 +16,9 @@ const DayView = ({ date, setDate ,tasks, setTasks, setEditEventID}) => {
         `${i.toString().padStart(2, '0')}:00`
     );
 
+    const timeAxisLabels = Array.from({ length: 25 }, (_, i) => 
+        `${i.toString().padStart(2, '0')}:00`
+    );
     // Update current time indicator
     useEffect(() => {
         const updateCurrentTime = () => {
@@ -142,6 +145,7 @@ const DayView = ({ date, setDate ,tasks, setTasks, setEditEventID}) => {
     }, []);
 
 
+
     // Calculate TaskBlock positions
     const initialMargin = 30; // Initial margin for the first layer
     const offsetMargin = 35; // Offset margin for each subsequent layer
@@ -187,6 +191,28 @@ const DayView = ({ date, setDate ,tasks, setTasks, setEditEventID}) => {
         );
     };
 
+    const today = new Date();
+    const isSameDay = date.getFullYear() === today.getFullYear() &&
+                      date.getMonth() === today.getMonth() &&
+                      date.getDate() === today.getDate();
+
+    const renderTimeIndicator = () => {
+        // Compare dates by converting to strings or comparing year/month/day values
+
+                          
+        if (isSameDay) {
+            return (
+                <div 
+                    className="current-time-indicator"
+                    style={{ top: `${currentTimePosition}%` }}
+                >
+                    <div className="current-time-dot" />
+                </div>
+            );
+        }
+        return null;
+    };
+
     return (
         <div className="time-grid-container"  ref={dayGridRef}>
             {/* Time axis */}
@@ -199,16 +225,16 @@ const DayView = ({ date, setDate ,tasks, setTasks, setEditEventID}) => {
             </div>
 
             {/* Day grid */}
-            <div className="time-grid" ref={dayGridRef}>
+            <div className="time-grid" ref={dayGridRef} style={{marginTop: '30px'}}>
                 {/* Header */}
-                <div className="time-grid-header">
+                {/*<div className="time-grid-header">
                     {date.toLocaleDateString('en-US', { 
                         weekday: 'long',
                         month: 'long',
                         day: 'numeric',
                         year: 'numeric'
                     })} 
-                </div>
+                </div>*/}
 
                 {/* Time grid */}
                 <div className="time-grid">
@@ -219,12 +245,7 @@ const DayView = ({ date, setDate ,tasks, setTasks, setEditEventID}) => {
                     ))}
 
                     {/* Current time indicator */}
-                    <div 
-                        className="current-time-indicator"
-                        style={{ top: `${currentTimePosition}%` }} 
-                    >
-                        <div className="current-time-dot" />
-                    </div>
+                    {renderTimeIndicator()}
 
                     {/* Render Task Blocks */}
                     {layers.map((layer, layerIndex) => (
